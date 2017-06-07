@@ -47,9 +47,9 @@ print()
 nextupdate = currenttime = time.time()
 nextupdate = (nextupdate - (nextupdate % (delay * 60))) + (delay * 60)
 #print(time.localtime(currenttime).tm_hour % 3)
-#if time.localtime(currenttime).tm_hour % 3 == 2 : 
-nextupdate = nextupdate - 7200
-#else : nextupdate = nextupdate + 3600
+if time.localtime(currenttime).tm_hour % 3 == 2 : 
+	nextupdate = nextupdate - 7200
+else : nextupdate = nextupdate + 3600
 print('current time: ', str(time.localtime(currenttime).tm_hour), ':', str(time.localtime(currenttime).tm_min), sep='')
 print(' next update: ', str(time.localtime(nextupdate).tm_hour ), ':', str(time.localtime(nextupdate).tm_min ), sep='')
 
