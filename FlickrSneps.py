@@ -39,7 +39,7 @@ delay = dbx.files_download('/delay.json')[1].json()
 print()
 #fileIDs.pop(0)
 
-nextupdate = currenttime = time.time() + 10800
+nextupdate = currenttime = time.time()
 nextupdate = (nextupdate - (nextupdate % (delay * 60))) + (delay * 60)
 print(time.localtime(currenttime).tm_hour % 3)
 nextupdate = nextupdate - 7200
