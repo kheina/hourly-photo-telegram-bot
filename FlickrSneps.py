@@ -150,11 +150,13 @@ dbx.files_upload(json.dumps(delay  ).encode('utf-8'), '/delay.json',   dropbox.f
 print()
 
 report = '`flickrsneps started\ncurrent delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + str(time.localtime(currenttime).tm_hour) + ':' + str(time.localtime(currenttime).tm_min) + '`\n  next update: `' + str(time.localtime(nextupdate).tm_hour) + ':' + str(time.localtime(nextupdate).tm_min) + '\n`next photo in queue: `'
-phototosend = fileIDs[0]
 for i in range(len(admins)):
 	requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendMessage', {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
-	requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendPhoto', {'chat_id': admins[i], 'photo': phototosend})
-	
+	if len(fileIDs) > 0 :
+		requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendPhoto', {'chat_id': admins[i], 'photo': fileIDs[0]})
+	else :
+		requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendMessage', {'chat_id': admins[i], 'text': 'NO PHOTOS IN QUEUE', 'parse_mode': 'Markdown'})
+
 	
 	
 	
@@ -328,10 +330,13 @@ def update_event():
 	
 	print('scheduling update for ', str(time.localtime(nextupdate).tm_hour ), ':', str(time.localtime(nextupdate).tm_min ), sep='')
 	scheduler.enter((delay * 60), 1, update_event, ())
-	report = '`update successful.\ncurrent time: `' + str(time.localtime(currenttime).tm_hour) + ':' + str(time.localtime(currenttime).tm_min) + '`\n next update: `' + str(time.localtime(nextupdate).tm_hour) + ':' + str(time.localtime(nextupdate).tm_min)
+	report = '`update successful.\ncurrent time: `' + str(time.localtime(currenttime).tm_hour) + ':' + str(time.localtime(currenttime).tm_min) + '`\n next update: `' + str(time.localtime(nextupdate).tm_hour) + ':' + str(time.localtime(nextupdate).tm_min) + '\n`next photo in queue: `'
 	for i in range(len(admins)):
 		requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendMessage', {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
-
+		if len(fileIDs) > 0 :
+			requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendPhoto', {'chat_id': admins[i], 'photo': fileIDs[0]})
+		else :
+			requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendMessage', {'chat_id': admins[i], 'text': 'NO PHOTOS IN QUEUE', 'parse_mode': 'Markdown'})
 
 
 
