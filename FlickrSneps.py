@@ -135,8 +135,9 @@ while len(updateList) > 0 :
 		mostrecentupdate = updateList[len(updateList) - 1]['update_id']
 		print('clearing updateList through to update_id', mostrecentupdate + 1)
 		response = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/getUpdates', {'offset': mostrecentupdate + 1})
+		response = response.json()
 		if response['ok'] :
-			updateList = response.json()['result']
+			updateList = response['result']
 			print()
 			print('response:', 'ok')
 			print(' updates:', len(updateList))
@@ -296,9 +297,10 @@ def update_event():
 		if len(updateList) > 0 :
 			mostrecentupdate = updateList[len(updateList) - 1]['update_id']
 			print('clearing updateList through to update_id', mostrecentupdate + 1)
+			response = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/getUpdates', {'offset': mostrecentupdate + 1})
+			response = response.json()
 			if response['ok'] :
-				r = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/getUpdates', {'offset': mostrecentupdate + 1})
-				updateList = r.json()['result']
+				updateList = response['result']
 				print(' updates:', len(updateList))
 				if len(updateList) <= 0 :
 					print('...success')
