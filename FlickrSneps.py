@@ -319,14 +319,14 @@ def update_event():
 		sentPhoto = sentPhoto.json()
 		if sentPhoto['ok'] :
 			if len(fileIDs) < 10 :
-				report = '`photo sent successfully.`\n`channel post: `' + str(sentPhoto['result']['message_id']) + '\n`photos remaining in queue:` ' + str(len(fileIDs)) + '\nLOW ON PHOTOS'
+				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'])
 			else :
-				report = '`photo sent successfully.`\n`channel post: `' + str(sentPhoto['result']['message_id']) + '\n`photos remaining in queue:` ' + str(len(fileIDs))
+				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'])
 			usedIDs.append(phototosend)
 			print('success.')
 		else :
 			fileIDs.append(phototosend)
-			report = '`post failed.`\n`photo re-added to queue.`\n`photos remaining in queue:` ' + str(len(fileIDs))
+			report = '`post failed.`\n`photo re-added to queue.`'
 			print('failed.')
 	else :
 		report = '`post failed.`\n`no photos in queue.`\nADD PHOTOS IMMEDIATELY'
@@ -372,7 +372,9 @@ def update_event():
 	#print('scheduling update for', nexttime)
 	print('scheduling update for', (delay), 'minutes from now')
 	scheduler.enter((delay * 60), 1, update_event, ())
-	report = report + '\n`current delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + noowtime + '`\n  next update: `' + nexttime + '\n`next photo in queue: `'
+	report = report + '\n`current delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + noowtime + '`\n  next update: `' + nexttime
+	if len(fileIDs) < 10 : report = report + '\nLOW ON PHOTOS'
+	report = report + '\n`next photo in queue: `'
 	for i in range(len(admins)):
 		requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendMessage', {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
 		if len(fileIDs) > 0 :
