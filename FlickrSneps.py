@@ -37,7 +37,7 @@ delay = dbx.files_download('/delay.json')[1].json()
 #print(delay, 'minute delay')
 
 print()
-
+#fileIDs.pop(0)
 
 nextupdate = currenttime = time.time()
 nextupdate = (nextupdate - (nextupdate % (delay * 60))) + (delay * 60)
@@ -272,7 +272,7 @@ def update_event():
 	print('sending photo to Flickr Sneps (id:-1001084745741)...')
 	if len(fileIDs) > 0 :
 		phototosend = fileIDs.pop(0)
-		sentPhoto = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendPhoto', {'chat_id': 118819437, 'photo': phototosend})
+		sentPhoto = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendPhoto', {'chat_id': -1001084745741, 'photo': phototosend})
 		sentPhoto = sentPhoto.json()
 		if sentPhoto['ok'] :
 			if len(fileIDs) < 10 :
@@ -299,7 +299,7 @@ def update_event():
 	print('uploading usedIDs.json to Dropbox')
 	dbx.files_upload(json.dumps(usedIDs).encode('utf-8'), '/usedIDs.json')
 	print('uploading delay.json to Dropbox')
-	dbx.files_upload(json.dumps(delay  ).encode('utf-8'), '/delay.json')
+	dbx.files_upload(json.dumps(delay  ).encode('utf-8'), '/delay.json'  )
 	print()
 
 	nextupdate = currenttime = time.time()
