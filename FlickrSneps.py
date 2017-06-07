@@ -149,10 +149,11 @@ print('uploading delay.json to Dropbox')
 dbx.files_upload(json.dumps(delay  ).encode('utf-8'), '/delay.json',   dropbox.files.WriteMode('overwrite', None))
 print()
 
-report = '`flickrsneps started\ncurrent delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + str(time.localtime(currenttime).tm_hour) + ':' + str(time.localtime(currenttime).tm_min) + '`\n  next update: `' + str(time.localtime(nextupdate).tm_hour) + ':' + str(time.localtime(nextupdate).tm_min)
+report = '`flickrsneps started\ncurrent delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + str(time.localtime(currenttime).tm_hour) + ':' + str(time.localtime(currenttime).tm_min) + '`\n  next update: `' + str(time.localtime(nextupdate).tm_hour) + ':' + str(time.localtime(nextupdate).tm_min + '`next photo in queue:`')
+phototosend = fileIDs[0]
 for i in range(len(admins)):
 	requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendMessage', {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
-
+	requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendPhoto', {'chat_id': admins[i], 'photo': phototosend})
 	
 	
 	
