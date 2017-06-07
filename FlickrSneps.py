@@ -396,7 +396,7 @@ nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
 
 print('current time:', noowtime)
 print(' next update:', nexttime)
-print('scheduling update for', (delay), 'minutes from now')
+print('flickrsneps started. scheduling first post...')
 print('scheduling update for', nexttime)
 scheduler.enterabs(nextupdate, 1, update_event, ())
 
