@@ -18,39 +18,44 @@ usedIDs = []
 delay = 180
 
 print('reading fileIDs.json')
-fileIDs = dbx.files_download('/fileIDs.json')[1].json()
-#print(len(fileIDs), 'file ids')
+dbxfileIDs = dbx.files_download('/fileIDs.json')
+fileIDs = dbxfileIDs[1].json()
+print(len(fileIDs), 'file ids')
+#print(dbxfileIDs[0])
 #print(fileIDs)
-
 print('reading usedIDs.json')
-usedIDs = dbx.files_download('/usedIDs.json')[1].json()
-#print(len(usedIDs), 'used ids')
+dbxusedIDs = dbx.files_download('/usedIDs.json')
+usedIDs = dbxusedIDs[1].json()
+print(len(usedIDs), 'used ids')
+#print(dbxusedIDs[0])
 #print(usedIDs)
-
 print('reading admins.json')
-admins = dbx.files_download('/admins.json')[1].json()
-#print(len(admins), 'admins')
+dbxadmins = dbx.files_download('/admins.json')
+admins = dbxadmins[1].json()
+print(len(admins), 'admins')
+#print(dbxadmins[0])
 #print(admins)
-	
 print('reading delay.json')
-delay = dbx.files_download('/delay.json')[1].json()
+dbxdelay = dbx.files_download('/delay.json')
+delay = dbxdelay[1].json()
 #print(delay, 'minute delay')
+print(dbxdelay[0])
 
 print()
 #fileIDs.pop(0)
 
 nextupdate = currenttime = time.time()
 nextupdate = (nextupdate - (nextupdate % (delay * 60))) + (delay * 60)
-print(time.localtime(currenttime).tm_hour % 3)
+#print(time.localtime(currenttime).tm_hour % 3)
 nextupdate = nextupdate - 7200
 #else : nextupdate = nextupdate + 3600
 print('current time: ', str(time.localtime(currenttime).tm_hour), ':', str(time.localtime(currenttime).tm_min), sep='')
 print(' next update: ', str(time.localtime(nextupdate).tm_hour ), ':', str(time.localtime(nextupdate).tm_min ), sep='')
-print()
 
 response = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/getUpdates')
 #print(response.url)
 response = response.json()
+print()
 if response['ok'] :
 	print('response:', 'ok')
 	updateList = response['result']
@@ -116,9 +121,11 @@ while len(updateList) > 0 :
 	if len(updateList) > 0 :
 		mostrecentupdate = updateList[len(updateList) - 1]['update_id']
 		print('clearing updateList through to update_id', mostrecentupdate + 1)
+		response = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/getUpdates', {'offset': mostrecentupdate + 1})
 		if response['ok'] :
-			r = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/getUpdates', {'offset': mostrecentupdate + 1})
-			updateList = r.json()['result']
+			updateList = response.json()['result']
+			print()
+			print('response:', 'ok')
 			print('updates:', len(updateList))
 			if len(updateList) <= 0 :
 				print('...success')
@@ -136,9 +143,9 @@ dbx.files_upload(json.dumps(fileIDs).encode('utf-8'), '/fileIDs.json', dropbox.f
 print('uploading usedIDs.json to Dropbox')
 dbx.files_upload(json.dumps(usedIDs).encode('utf-8'), '/usedIDs.json', dropbox.files.WriteMode('overwrite', None))
 print('uploading admins.json to Dropbox')
-dbx.files_upload(json.dumps(admins ).encode('utf-8'), '/admins.json', dropbox.files.WriteMode('overwrite', None))
+dbx.files_upload(json.dumps(admins ).encode('utf-8'), '/admins.json',  dropbox.files.WriteMode('overwrite', None))
 print('uploading delay.json to Dropbox')
-dbx.files_upload(json.dumps(delay  ).encode('utf-8'), '/delay.json', dropbox.files.WriteMode('overwrite', None))
+dbx.files_upload(json.dumps(delay  ).encode('utf-8'), '/delay.json',   dropbox.files.WriteMode('overwrite', None))
 print()
 
 report = '`flickrsneps started\ncurrent delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + str(time.localtime(currenttime).tm_hour) + ':' + str(time.localtime(currenttime).tm_min) + '`\n  next update: `' + str(time.localtime(nextupdate).tm_hour) + ':' + str(time.localtime(nextupdate).tm_min)
@@ -167,23 +174,28 @@ for i in range(len(admins)):
 
 def update_event():
 	print('reading fileIDs.json')
-	fileIDs = dbx.files_download('/fileIDs.json')[1].json()
-	#print(len(fileIDs), 'file ids')
+	dbxfileIDs = dbx.files_download('/fileIDs.json')
+	fileIDs = dbxfileIDs[1].json()
+	print(len(fileIDs), 'file ids')
+	#print(dbxfileIDs[0])
 	#print(fileIDs)
-
 	print('reading usedIDs.json')
-	usedIDs = dbx.files_download('/usedIDs.json')[1].json()
-	#print(len(usedIDs), 'used ids')
+	dbxusedIDs = dbx.files_download('/usedIDs.json')
+	usedIDs = dbxusedIDs[1].json()
+	print(len(usedIDs), 'used ids')
+	#print(dbxusedIDs[0])
 	#print(usedIDs)
-
 	print('reading admins.json')
-	admins = dbx.files_download('/admins.json')[1].json()
-	#print(len(admins), 'admins')
+	dbxadmins = dbx.files_download('/admins.json')
+	admins = dbxadmins[1].json()
+	print(len(admins), 'admins')
+	#print(dbxadmins[0])
 	#print(admins)
-	
 	print('reading delay.json')
-	delay = dbx.files_download('/delay.json')[1].json()
+	dbxdelay = dbx.files_download('/delay.json')
+	delay = dbxdelay[1].json()
 	#print(delay, 'minute delay')
+	print(dbxdelay[0])
 
 	print()
 
@@ -293,20 +305,20 @@ def update_event():
 
 	#118819437 my ID
 
-	print()
+	print()	
 	print('uploading fileIDs.json to Dropbox')
-	dbx.files_upload(json.dumps(fileIDs).encode('utf-8'), '/fileIDs.json')
+	dbx.files_upload(json.dumps(fileIDs).encode('utf-8'), '/fileIDs.json', dropbox.files.WriteMode('overwrite', None))
 	print('uploading usedIDs.json to Dropbox')
-	dbx.files_upload(json.dumps(usedIDs).encode('utf-8'), '/usedIDs.json')
+	dbx.files_upload(json.dumps(usedIDs).encode('utf-8'), '/usedIDs.json', dropbox.files.WriteMode('overwrite', None))
 	print('uploading delay.json to Dropbox')
-	dbx.files_upload(json.dumps(delay  ).encode('utf-8'), '/delay.json'  )
+	dbx.files_upload(json.dumps(delay  ).encode('utf-8'), '/delay.json',   dropbox.files.WriteMode('overwrite', None))
 	print()
 
 	nextupdate = currenttime = time.time()
 	nextupdate = (nextupdate - (nextupdate % (delay * 60))) + (delay * 60)
-	print(time.localtime(currenttime).tm_hour % 3)
-	if time.localtime(currenttime).tm_hour % 3 == 2 : nextupdate = nextupdate - 7200
-	else : nextupdate = nextupdate + 3600
+	#print(time.localtime(currenttime).tm_hour % 3)
+	nextupdate = nextupdate - 7200
+	#else : nextupdate = nextupdate + 3600
 	print('current time: ', str(time.localtime(currenttime).tm_hour), ':', str(time.localtime(currenttime).tm_min), sep='')
 	print(' next update: ', str(time.localtime(nextupdate).tm_hour ), ':', str(time.localtime(nextupdate).tm_min ), sep='')
 	print()
