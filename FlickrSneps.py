@@ -47,8 +47,9 @@ print()
 nextupdate = currenttime = time.time()
 nextupdate = (nextupdate - (nextupdate % (delay * 60))) + (delay * 60)
 #print(time.localtime(currenttime).tm_hour % 3)
-if time.localtime(currenttime).tm_hour % 3 == 2 : nextupdate = nextupdate - 7200
-else : nextupdate = nextupdate + 3600
+#if time.localtime(currenttime).tm_hour % 3 == 2 : 
+nextupdate = nextupdate - 7200
+#else : nextupdate = nextupdate + 3600
 print('current time: ', str(time.localtime(currenttime).tm_hour), ':', str(time.localtime(currenttime).tm_min), sep='')
 print(' next update: ', str(time.localtime(nextupdate).tm_hour ), ':', str(time.localtime(nextupdate).tm_min ), sep='')
 
@@ -325,7 +326,7 @@ def update_event():
 
 	
 	print('scheduling update for ', str(time.localtime(nextupdate).tm_hour ), ':', str(time.localtime(nextupdate).tm_min ), sep='')
-	scheduler.enterabs(nextupdate, 1, update_event, ())
+	scheduler.enter((delay * 60), 1, update_event, ())
 	report = '`update successful.\ncurrent time: `' + str(time.localtime(currenttime).tm_hour) + ':' + str(time.localtime(currenttime).tm_min) + '`\n next update: `' + str(time.localtime(nextupdate).tm_hour) + ':' + str(time.localtime(nextupdate).tm_min)
 	for i in range(len(admins)):
 		requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendMessage', {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
