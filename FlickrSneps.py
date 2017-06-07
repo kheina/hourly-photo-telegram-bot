@@ -38,7 +38,7 @@ print(len(admins), 'admins')
 print('reading delay.json')
 dbxdelay = dbx.files_download('/delay.json')
 delay = dbxdelay[1].json()
-#print(delay, 'minute delay')
+print(delay, 'minute delay')
 #print(dbxdelay[0])
 
 print()
@@ -50,9 +50,21 @@ nextupdate = (nextupdate - (nextupdate % (delay * 60))) + (delay * 60)
 if time.localtime(currenttime).tm_hour % 3 == 2 : 
 	nextupdate = nextupdate - 7200
 else : nextupdate = nextupdate + 3600
-print('current time: ', str(time.localtime(currenttime).tm_hour), ':', str(time.localtime(currenttime).tm_min), sep='')
-print(' next update: ', str(time.localtime(nextupdate).tm_hour ), ':', str(time.localtime(nextupdate).tm_min ), sep='')
 
+noowtime = 'current time: '
+if time.localtime(currenttime).tm_hour < 10 : noowtime = noowtime + '0'
+noowtime = noowtime + str(time.localtime(currenttime).tm_hour) + ':'
+if time.localtime(currenttime).tm_min  < 10 : noowtime = noowtime + '0'
+noowtime = noowtime + str(time.localtime(currenttime).tm_min)
+
+nexttime = ' next update: '
+if time.localtime(nextupdate).tm_hour < 10 : nexttime = nexttime + '0'
+nexttime = nexttime + str(time.localtime(nextupdate).tm_hour) + ':'
+if time.localtime(nextupdate).tm_min  < 10 : nexttime = nexttime + '0'
+nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
+
+print(noowtime)
+print(nexttime)
 response = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/getUpdates')
 #print(response.url)
 response = response.json()
@@ -149,7 +161,19 @@ print('uploading delay.json to Dropbox')
 dbx.files_upload(json.dumps(delay  ).encode('utf-8'), '/delay.json',   dropbox.files.WriteMode('overwrite', None))
 print()
 
-report = '`flickrsneps started\ncurrent delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + str(time.localtime(currenttime).tm_hour) + ':' + str(time.localtime(currenttime).tm_min) + '`\n  next update: `' + str(time.localtime(nextupdate).tm_hour) + ':' + str(time.localtime(nextupdate).tm_min)
+noowtime = ''
+if time.localtime(currenttime).tm_hour < 10 : noowtime = noowtime + '0'
+noowtime = noowtime + str(time.localtime(currenttime).tm_hour) + ':'
+if time.localtime(currenttime).tm_min  < 10 : noowtime = noowtime + '0'
+noowtime = noowtime + str(time.localtime(currenttime).tm_min)
+
+nexttime = ''
+if time.localtime(nextupdate).tm_hour < 10 : nexttime = nexttime + '0'
+nexttime = nexttime + str(time.localtime(nextupdate).tm_hour) + ':'
+if time.localtime(nextupdate).tm_min  < 10 : nexttime = nexttime + '0'
+nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
+
+report = '`flickrsneps started\ncurrent delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + noowtime + '`\n  next update: `' + nexttime
 report = report + '\n`next photo in queue: `'
 for i in range(len(admins)):
 	requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendMessage', {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
@@ -199,7 +223,7 @@ def update_event():
 	print('reading delay.json')
 	dbxdelay = dbx.files_download('/delay.json')
 	delay = dbxdelay[1].json()
-	#print(delay, 'minute delay')
+	print(delay, 'minute delay')
 	#print(dbxdelay[0])
 
 	print()
@@ -289,13 +313,13 @@ def update_event():
 	print('sending photo to Flickr Sneps (id:-1001084745741)...')
 	if len(fileIDs) > 0 :
 		phototosend = fileIDs.pop(0)
-		sentPhoto = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendPhoto', {'chat_id': -1001084745741, 'photo': phototosend})
-		sentPhoto = sentPhoto.json()
+		#sentPhoto = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendPhoto', {'chat_id': -1001084745741, 'photo': phototosend})
+		#sentPhoto = sentPhoto.json()
 		if sentPhoto['ok'] :
 			if len(fileIDs) < 10 :
-				report = '`photo sent successfully.`\n`channel post: ' + str(sentPhoto['result']['message_id']) + '`\n`photos remaining in queue:` ' + str(len(fileIDs)) + '\nLOW ON PHOTOS'
+				report = '`photo sent successfully.`\n`channel post: `' + str(sentPhoto['result']['message_id']) + '\n`photos remaining in queue:` ' + str(len(fileIDs)) + '\nLOW ON PHOTOS'
 			else :
-				report = '`photo sent successfully.`\n`channel post: ' + str(sentPhoto['result']['message_id']) + '`\n`photos remaining in queue:` ' + str(len(fileIDs))
+				report = '`photo sent successfully.`\n`channel post: `' + str(sentPhoto['result']['message_id']) + '\n`photos remaining in queue:` ' + str(len(fileIDs))
 			usedIDs.append(phototosend)
 			print('success.')
 		else :
@@ -322,16 +346,31 @@ def update_event():
 	nextupdate = currenttime = time.time()
 	nextupdate = (nextupdate - (nextupdate % (delay * 60))) + (delay * 60)
 	#print(time.localtime(currenttime).tm_hour % 3)
-	nextupdate = nextupdate - 7200
-	#else : nextupdate = nextupdate + 3600
-	print('current time: ', str(time.localtime(currenttime).tm_hour), ':', str(time.localtime(currenttime).tm_min), sep='')
-	print(' next update: ', str(time.localtime(nextupdate).tm_hour ), ':', str(time.localtime(nextupdate).tm_min ), sep='')
+	if time.localtime(currenttime).tm_hour % 3 == 2 : 
+		nextupdate = nextupdate - 7200
+	else : nextupdate = nextupdate + 3600
+	
+	noowtime = ''
+	if time.localtime(currenttime).tm_hour < 10 : noowtime = noowtime + '0'
+	noowtime = noowtime + str(time.localtime(currenttime).tm_hour) + ':'
+	if time.localtime(currenttime).tm_min  < 10 : noowtime = noowtime + '0'
+	noowtime = noowtime + str(time.localtime(currenttime).tm_min)
+
+	nexttime = ''
+	if time.localtime(nextupdate).tm_hour < 10 : nexttime = nexttime + '0'
+	nexttime = nexttime + str(time.localtime(nextupdate).tm_hour) + ':'
+	if time.localtime(nextupdate).tm_min  < 10 : nexttime = nexttime + '0'
+	nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
+
+	print('current time:', noowtime)
+	print(' next update:', nexttime)
 	print()
 
 	
-	print('scheduling update for ', str(time.localtime(nextupdate).tm_hour ), ':', str(time.localtime(nextupdate).tm_min ), sep='')
+	#print('scheduling update for', nexttime)
+	print('scheduling update for', (delay), 'minutes from now')
 	scheduler.enter((delay * 60), 1, update_event, ())
-	report = report + '\n`update successful.`\n`current time: `' + str(time.localtime(currenttime).tm_hour) + ':' + str(time.localtime(currenttime).tm_min) + '\n` next update: `' + str(time.localtime(nextupdate).tm_hour) + ':' + str(time.localtime(nextupdate).tm_min) + '\n`next photo in queue: `'
+	report = report + '\n`current delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + noowtime + '`\n  next update: `' + nexttime + '\n`next photo in queue: `'
 	for i in range(len(admins)):
 		requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendMessage', {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
 		if len(fileIDs) > 0 :
@@ -341,7 +380,24 @@ def update_event():
 
 
 
-print('scheduling update for ', str(time.localtime(nextupdate).tm_hour ), ':', str(time.localtime(nextupdate).tm_min ), sep='')
+			
+			
+noowtime = ''
+if time.localtime(currenttime).tm_hour < 10 : noowtime = noowtime + '0'
+noowtime = noowtime + str(time.localtime(currenttime).tm_hour) + ':'
+if time.localtime(currenttime).tm_min  < 10 : noowtime = noowtime + '0'
+noowtime = noowtime + str(time.localtime(currenttime).tm_min)
+
+nexttime = ''
+if time.localtime(nextupdate).tm_hour < 10 : nexttime = nexttime + '0'
+nexttime = nexttime + str(time.localtime(nextupdate).tm_hour) + ':'
+if time.localtime(nextupdate).tm_min  < 10 : nexttime = nexttime + '0'
+nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
+
+print('current time:', noowtime)
+print(' next update:', nexttime)
+print('scheduling update for', (delay), 'minutes from now')
+print('scheduling update for', nexttime)
 scheduler.enterabs(nextupdate, 1, update_event, ())
 
 scheduler.run()
