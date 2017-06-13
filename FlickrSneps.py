@@ -51,23 +51,23 @@ nextupdate = (nextupdate - (nextupdate % (delay * 60))) + (delay * 60)
 #	nextupdate = nextupdate - 7200
 #else : nextupdate = nextupdate + 3600
 
-noowtime = 'current time: '
+noowtime = ''
 if time.localtime(currenttime).tm_hour < 10 : noowtime = noowtime + '0'
 noowtime = noowtime + str(time.localtime(currenttime).tm_hour) + ':'
 if time.localtime(currenttime).tm_min  < 10 : noowtime = noowtime + '0'
 noowtime = noowtime + str(time.localtime(currenttime).tm_min)
 
-nexttime = ' next update: '
+nexttime = ''
 if time.localtime(nextupdate).tm_hour < 10 : nexttime = nexttime + '0'
 nexttime = nexttime + str(time.localtime(nextupdate).tm_hour) + ':'
 if time.localtime(nextupdate).tm_min  < 10 : nexttime = nexttime + '0'
 nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
 
-print(noowtime)
-print(nexttime)
+print('current time:', noowtime)
+print(' next update:', nexttime)
+print("getUpdates")
 response = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/getUpdates')
 #print(response.url)
-print("getUpdates")
 response = response.json()
 print()
 if response['ok'] :
@@ -229,10 +229,9 @@ def update_event():
 	#print(dbxdelay[0])
 
 	print()
-
+	print("getUpdates")
 	response = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/getUpdates')
 	#print(response.url)
-	print("getUpdates")
 	response = response.json()
 	if response['ok'] :
 		print('response:', 'ok')
