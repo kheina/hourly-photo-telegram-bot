@@ -67,6 +67,7 @@ print(noowtime)
 print(nexttime)
 response = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/getUpdates')
 #print(response.url)
+print("getUpdates")
 response = response.json()
 print()
 if response['ok'] :
@@ -230,7 +231,8 @@ def update_event():
 	print()
 
 	response = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/getUpdates')
-	print(response.url)
+	#print(response.url)
+	print("getUpdates")
 	response = response.json()
 	if response['ok'] :
 		print('response:', 'ok')
