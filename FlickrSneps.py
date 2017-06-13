@@ -44,12 +44,12 @@ print(delay, 'minute delay')
 print()
 #fileIDs.pop(0)
 
-nextupdate = currenttime = time.time()
+nextupdate = currenttime = (time.time() - 14400)
 nextupdate = (nextupdate - (nextupdate % (delay * 60))) + (delay * 60)
 #print(time.localtime(currenttime).tm_hour % 3)
-if time.localtime(currenttime).tm_hour % 3 == 2 : 
-	nextupdate = nextupdate - 7200
-else : nextupdate = nextupdate + 3600
+#if time.localtime(currenttime).tm_hour % 3 == 2 : 
+#	nextupdate = nextupdate - 7200
+#else : nextupdate = nextupdate + 3600
 
 noowtime = 'current time: '
 if time.localtime(currenttime).tm_hour < 10 : noowtime = noowtime + '0'
@@ -345,12 +345,8 @@ def update_event():
 	dbx.files_upload(json.dumps(delay  ).encode('utf-8'), '/delay.json',   dropbox.files.WriteMode('overwrite', None))
 	print()
 
-	nextupdate = currenttime = time.time()
+	nextupdate = currenttime = (time.time() - 14400)
 	nextupdate = (nextupdate - (nextupdate % (delay * 60))) + (delay * 60)
-	#print(time.localtime(currenttime).tm_hour % 3)
-	if time.localtime(currenttime).tm_hour % 3 == 2 : 
-		nextupdate = nextupdate - 7200
-	else : nextupdate = nextupdate + 3600
 	
 	noowtime = ''
 	if time.localtime(currenttime).tm_hour < 10 : noowtime = noowtime + '0'
@@ -402,7 +398,7 @@ print('current time:', noowtime)
 print(' next update:', nexttime)
 print('flickrsneps started. scheduling first post...')
 print('scheduling update for', nexttime)
-scheduler.enterabs(nextupdate, 1, update_event, ())
+scheduler.enterabs((nextupdate + 14400), 1, update_event, ())
 
 scheduler.run()
 
