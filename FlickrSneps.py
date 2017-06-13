@@ -314,14 +314,14 @@ def update_event():
 	print()
 	print('sending photo to Flickr Sneps (id:-1001084745741)...')
 	if len(fileIDs) > 0 :
-		phototosend = fileIDs.pop(0)
-		sentPhoto = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendPhoto', {'chat_id': -1001084745741, 'photo': phototosend})
-		sentPhoto = sentPhoto.json()
+		#phototosend = fileIDs.pop(0)
+		#sentPhoto = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendPhoto', {'chat_id': -1001084745741, 'photo': phototosend})
+		#sentPhoto = sentPhoto.json()
 		if sentPhoto['ok'] :
 			if len(fileIDs) < 10 :
-				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'])
+				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'] - 42)
 			else :
-				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'])
+				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'] - 42)
 			usedIDs.append(phototosend)
 			print('success.')
 		else :
