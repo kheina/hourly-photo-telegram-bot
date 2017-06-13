@@ -321,9 +321,9 @@ def update_event():
 		sentPhoto = sentPhoto.json()
 		if sentPhoto['ok'] :
 			if len(fileIDs) < 10 :
-				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'] - 42)
+				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'] - 43)#number of posts that have been deleted from the channel
 			else :
-				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'] - 42)
+				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'] - 43)#number of posts that have been deleted from the channel
 			usedIDs.append(phototosend)
 			print('success.')
 		else :
