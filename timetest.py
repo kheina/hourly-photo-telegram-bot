@@ -5,10 +5,10 @@ delay = 180
 print(delay, 'minute delay')
 
 
-nextupdate = currenttime = time.time()
+nextupdate = currenttime = (time.time() - 14400)
 for i in range(100):
 	print()
-	nextupdate = currenttime = time.time() + (3690 * i)
+	nextupdate = currenttime = (time.time() - 14400) + (3690 * i)
 	nextupdate = (nextupdate - (nextupdate % (delay * 60))) + (delay * 60)
 	#print(time.localtime(currenttime).tm_hour % 3)
 	#if time.localtime(currenttime).tm_hour % 3 == 2 : 
@@ -29,3 +29,4 @@ for i in range(100):
 
 	print(noowtime)
 	print(nexttime)
+	#print(" heroku test time: ")
