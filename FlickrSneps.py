@@ -65,11 +65,11 @@ nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
 
 print('current time:', noowtime)
 print(' next update:', nexttime)
+print()
 print("getUpdates")
 response = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/getUpdates')
 #print(response.url)
 response = response.json()
-print()
 if response['ok'] :
 	print('response:', 'ok')
 	updateList = response['result']
