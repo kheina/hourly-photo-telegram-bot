@@ -15,8 +15,15 @@ scheduler = sched.scheduler(time.time, time.sleep)
 admins = [118819437]
 fileIDs = []
 usedIDs = []
+forwardList = []
 delay = 180
 
+print('reading admins.json')
+dbxadmins = dbx.files_download('/admins.json')
+admins = dbxadmins[1].json()
+print(len(admins), 'admins')
+#print(dbxadmins[0])
+#print(admins)
 print('reading fileIDs.json')
 dbxfileIDs = dbx.files_download('/fileIDs.json')
 fileIDs = dbxfileIDs[1].json()
@@ -29,12 +36,11 @@ usedIDs = dbxusedIDs[1].json()
 print(len(usedIDs), 'used ids')
 #print(dbxusedIDs[0])
 #print(usedIDs)
-print('reading admins.json')
-dbxadmins = dbx.files_download('/admins.json')
-admins = dbxadmins[1].json()
-print(len(admins), 'admins')
-#print(dbxadmins[0])
-#print(admins)
+print('reading forwardList.json')
+dbxdelay = dbx.files_download('/forwardList.json')
+forwardList = dbxdelay[1].json()
+print(len(forwardList), 'forwards')
+print(forwardList)
 print('reading delay.json')
 dbxdelay = dbx.files_download('/delay.json')
 delay = dbxdelay[1].json()
@@ -120,15 +126,25 @@ while len(updateList) > 0 :
 					else :
 						print('')
 			else :
-				print('update not from admin', end=' ') 
-				if 'from' in updateList[i]['message'] :
-					if 'username' in updateList[i]['message']['from'] :
-						print('(from ', updateList[i]['message']['from']['username'], ')', sep='')
+				print('update not from admin', end=' ')
+				if    'new_chat_member' in updateList[i]['message'] :
+					if updateList[i]['message']['new_chat_member']['id'] == 394580059 : #THIS IS THE BOT'S ID
+						forwardList.append(updateList[i]['message']['chat']['id'])
+						print('\nadded', updateList[i]['message']['chat']['title'], 'to forwardList')
+				elif 'left_chat_member' in updateList[i]['message'] :
+					if updateList[i]['message']['left_chat_member']['id'] == 394580059 :
+						if updateList[i]['message']['chat']['id'] in forwardList :
+							forwardList.remove(updateList[i]['message']['chat']['id'])
+							print('\nremoved', updateList[i]['message']['chat']['title'], 'from forwardList')
+				else :			
+					if 'from' in updateList[i]['message'] :
+						if 'username' in updateList[i]['message']['from'] :
+							print('(from ', updateList[i]['message']['from']['username'], ')', sep='')
+						else :
+							print('(from ', updateList[i]['message']['from']['first_name'], ' (', updateList[i]['message']['from']['id'], '))', sep='')
 					else :
-						print('(from ', updateList[i]['message']['from']['first_name'], ' (', updateList[i]['message']['from']['id'], '))', sep='')
-				else :
-					print('')
-				print('   ', updateList[i]['message'])
+						print('')
+					print('   ', updateList[i]['message'])
 		else :
 			print('update not does not contain message')
 			print(updateList[i])
@@ -154,11 +170,13 @@ else :
 
 print()	
 print('uploading fileIDs.json to Dropbox')
-dbx.files_upload(json.dumps(fileIDs).encode('utf-8'), '/fileIDs.json', dropbox.files.WriteMode('overwrite', None))
+dbx.files_upload(json.dumps(fileIDs    ).encode('utf-8'), '/fileIDs.json',       dropbox.files.WriteMode('overwrite', None))
 print('uploading usedIDs.json to Dropbox')
-dbx.files_upload(json.dumps(usedIDs).encode('utf-8'), '/usedIDs.json', dropbox.files.WriteMode('overwrite', None))
+dbx.files_upload(json.dumps(usedIDs    ).encode('utf-8'), '/usedIDs.json',       dropbox.files.WriteMode('overwrite', None))
 print('uploading delay.json to Dropbox')
-dbx.files_upload(json.dumps(delay  ).encode('utf-8'), '/delay.json',   dropbox.files.WriteMode('overwrite', None))
+dbx.files_upload(json.dumps(delay      ).encode('utf-8'), '/delay.json',         dropbox.files.WriteMode('overwrite', None))
+print('uploading forwardList.json to Dropbox')
+dbx.files_upload(json.dumps(forwardList).encode('utf-8'), '/forwardList.json',   dropbox.files.WriteMode('overwrite', None))
 print()
 
 noowtime = ''
@@ -281,15 +299,25 @@ def update_event():
 						else :
 							print('')
 				else :
-					print('update not from admin', end=' ') 
-					if 'from' in updateList[i]['message'] :
-						if 'username' in updateList[i]['message']['from'] :
-							print('(from ', updateList[i]['message']['from']['username'], ')', sep='')
+					print('update not from admin', end=' ')
+					if    'new_chat_member' in updateList[i]['message'] :
+						if updateList[i]['message']['new_chat_member']['id'] == 394580059 : #THIS IS THE BOT'S ID
+							forwardList.append(updateList[i]['message']['chat']['id'])
+							print('\nadded', updateList[i]['message']['chat']['title'], 'to forwardList')
+					elif 'left_chat_member' in updateList[i]['message'] :
+						if updateList[i]['message']['left_chat_member']['id'] == 394580059 :
+							if updateList[i]['message']['chat']['id'] in forwardList :
+								forwardList.remove(updateList[i]['message']['chat']['id'])
+								print('\nremoved', updateList[i]['message']['chat']['title'], 'from forwardList')
+					else :			
+						if 'from' in updateList[i]['message'] :
+							if 'username' in updateList[i]['message']['from'] :
+								print('(from ', updateList[i]['message']['from']['username'], ')', sep='')
+							else :
+								print('(from ', updateList[i]['message']['from']['first_name'], ' (', updateList[i]['message']['from']['id'], '))', sep='')
 						else :
-							print('(from ', updateList[i]['message']['from']['first_name'], ' (', updateList[i]['message']['from']['id'], '))', sep='')
-					else :
-						print('')
-					print('   ', updateList[i]['message'])
+							print('')
+						print('   ', updateList[i]['message'])
 			else :
 				print('update not does not contain message')
 				print(updateList[i])
@@ -323,6 +351,13 @@ def update_event():
 				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'] - 43)#number of posts that have been deleted from the channel
 			usedIDs.append(phototosend)
 			print('success.')
+			
+			#FORWARDING PHOTO
+			print('forwarding photo to', len(forwardList), 'chats')
+			for i in range(len(forwardList)):
+				requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/forwardMessage', {'chat_id': forwardList[i], 'from_chat_id': -1001084745741, 'message_id': sentPhoto['result']['message_id']})
+			report = report + '\n` forwarded to: `' + str(len(forwardList)) + '` chats`'
+			
 		else :
 			fileIDs.append(phototosend)
 			report = '`post failed.`\n`photo re-added to queue.`'
@@ -378,9 +413,10 @@ def update_event():
 			requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendMessage', {'chat_id': admins[i], 'text': 'NO PHOTOS IN QUEUE', 'parse_mode': 'Markdown'})
 
 
+def forward_photo():
+	print('forwarding photo to', len(forwardList), 'chats')
 
-			
-			
+
 noowtime = ''
 if time.localtime(currenttime).tm_hour < 10 : noowtime = noowtime + '0'
 noowtime = noowtime + str(time.localtime(currenttime).tm_hour) + ':'
