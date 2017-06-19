@@ -377,11 +377,13 @@ def update_event():
 
 	print()	
 	print('uploading fileIDs.json to Dropbox')
-	dbx.files_upload(json.dumps(fileIDs).encode('utf-8'), '/fileIDs.json', dropbox.files.WriteMode('overwrite', None))
+	dbx.files_upload(json.dumps(fileIDs    ).encode('utf-8'), '/fileIDs.json',       dropbox.files.WriteMode('overwrite', None))
 	print('uploading usedIDs.json to Dropbox')
-	dbx.files_upload(json.dumps(usedIDs).encode('utf-8'), '/usedIDs.json', dropbox.files.WriteMode('overwrite', None))
+	dbx.files_upload(json.dumps(usedIDs    ).encode('utf-8'), '/usedIDs.json',       dropbox.files.WriteMode('overwrite', None))
 	print('uploading delay.json to Dropbox')
-	dbx.files_upload(json.dumps(delay  ).encode('utf-8'), '/delay.json',   dropbox.files.WriteMode('overwrite', None))
+	dbx.files_upload(json.dumps(delay      ).encode('utf-8'), '/delay.json',         dropbox.files.WriteMode('overwrite', None))
+	print('uploading forwardList.json to Dropbox')
+	dbx.files_upload(json.dumps(forwardList).encode('utf-8'), '/forwardList.json',   dropbox.files.WriteMode('overwrite', None))
 	print()
 
 	nextupdate = currenttime = (time.time() - 14400)
