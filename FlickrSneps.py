@@ -7,11 +7,23 @@ import dropbox
 dbx = dropbox.Dropbox('iPVSiTTotuYAAAAAAAEgnRwVETJXdTYNZ_b5QdezBhSF9QN97HhzU6EqObRElMaM')
 #enter your dropbox access token in the ('') above
 
+#telegram bot auth token (given by @BotFather upon your bot's creation)
+token = '394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c'
+#enter your telegram bot's auth token in the '' above
+
+#the chat_id of the channel where all the pictures will be posted
+channel = -1001084745741
+#enter your telegram channel's chat_id after the = above
+
+#the id of the bot itself
+botID = 394580059
+#enter your telegram bot's id after the = above
+
 #initialize the scheduler
 scheduler = sched.scheduler(time.time, time.sleep)
 
 #initialize all the lists and variables
-admins = [118819437]
+admins = [118819437]	#this is in case the admin download from dropbox fails
 fileIDs = []
 usedIDs = []
 forwardList = []
@@ -21,10 +33,10 @@ report = ''
 
 
 
-
-
 def update():
 	#reinitialize all the lists and variables as global
+	global token
+	global botID
 	global admins
 	global fileIDs
 	global usedIDs
@@ -69,7 +81,8 @@ def update():
 
 	print()
 	print("getUpdates")
-	response = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/getUpdates')
+	request = 'https://api.telegram.org/bot' + token + '/getUpdates'
+	response = requests.get(request)
 	#print(response.url)
 	response = response.json()
 	if response['ok'] :
@@ -124,11 +137,11 @@ def update():
 				else :
 					print('update not from admin', end=' ')
 					if    'new_chat_member' in updateList[i]['message'] :
-						if  updateList[i]['message']['new_chat_member']['id'] == 394580059 : #THIS IS THE BOT'S ID
+						if  updateList[i]['message']['new_chat_member']['id'] == botID :
 							forwardList.append(updateList[i]['message']['chat']['id'])
 							print('\nadded', updateList[i]['message']['chat']['title'], 'to forwardList')
 					elif 'left_chat_member' in updateList[i]['message'] :
-						if updateList[i]['message']['left_chat_member']['id'] == 394580059 :
+						if updateList[i]['message']['left_chat_member']['id'] == botID :
 							if updateList[i]['message']['chat']['id'] in forwardList :
 								forwardList.remove(updateList[i]['message']['chat']['id'])
 								print('\nremoved', updateList[i]['message']['chat']['title'], 'from forwardList')
@@ -147,7 +160,8 @@ def update():
 		if len(updateList) > 0 :
 			mostrecentupdate = updateList[len(updateList) - 1]['update_id']
 			print('clearing updateList through to update_id', mostrecentupdate + 1)
-			response = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/getUpdates', {'offset': mostrecentupdate + 1})
+			request = 'https://api.telegram.org/bot' + token + '/getUpdates'
+			response = requests.get(request, {'offset': mostrecentupdate + 1})
 			response = response.json()
 			if response['ok'] :
 				updateList = response['result']
@@ -162,8 +176,6 @@ def update():
 		print('updateList empty')
 
 	print()
-
-
 
 
 
@@ -187,21 +199,21 @@ def update_dropbox() :
 
 
 
-
-
-
 def post_photo():
 	print('running post_photo()')
 	#reinitialize all the lists and variables as global
+	global token
+	global channel
 	global fileIDs
 	global usedIDs
 	global forwardList
 	global report
 	
-	print('sending photo to Flickr Sneps (id:-1001084745741)...')
+	print('sending photo to chat_id:', channel, '...', sep='')
 	if len(fileIDs) > 0 :
 		phototosend = fileIDs.pop(0)
-		sentPhoto = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendPhoto', {'chat_id': -1001084745741, 'photo': phototosend})
+		request = 'https://api.telegram.org/bot' + token + '/sendPhoto'
+		sentPhoto = requests.get(request, {'chat_id': channel, 'photo': phototosend})
 		sentPhoto = sentPhoto.json()
 		if sentPhoto['ok'] :
 			if len(fileIDs) < 10 :
@@ -213,8 +225,9 @@ def post_photo():
 			
 			#FORWARDING PHOTO
 			print('forwarding photo to', len(forwardList), 'chats')
+			request = 'https://api.telegram.org/bot' + token + '/forwardMessage'
 			for i in range(len(forwardList)):
-				requests.post('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/forwardMessage', {'chat_id': forwardList[i], 'from_chat_id': -1001084745741, 'message_id': sentPhoto['result']['message_id']})
+				requests.post(token, {'chat_id': forwardList[i], 'from_chat_id': channel, 'message_id': sentPhoto['result']['message_id']})
 			report = report + '\n` forwarded to: `' + str(len(forwardList)) + '` chats`'
 			
 		else :
@@ -223,8 +236,6 @@ def post_photo():
 			print('failed.')
 	else :
 		report = '`post failed.`\n`no photos in queue.`\nADD PHOTOS IMMEDIATELY'
-
-
 
 
 
@@ -263,8 +274,6 @@ def schedule_nextupdate():
 
 
 
-
-
 def schedule_firstupdate():
 	print('schedule_firstupdate()')
 	#reinitialize all the lists and variables as global
@@ -300,25 +309,27 @@ def schedule_firstupdate():
 
 
 
-
-
 def send_report():
 	print('send_report()')
 	#reinitialize all the lists and variables as global
+	global token
 	global admins
 	global fileIDs
 	global report
 	
-	for i in range(len(admins)):
-		requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendMessage', {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
-		if len(fileIDs) > 0 :
-			requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendPhoto', {'chat_id': admins[i], 'photo': fileIDs[0]})
-		else :
-			requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendMessage', {'chat_id': admins[i], 'text': 'NO PHOTOS IN QUEUE', 'parse_mode': 'Markdown'})
+	if len(fileIDs) > 0 :
+		request1 = 'https://api.telegram.org/bot' + token + '/sendMessage'
+		request2 = 'https://api.telegram.org/bot' + token + '/sendPhoto'
+		for i in range(len(admins)):
+			requests.get(request1, {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
+			requests.get(request2, {'chat_id': admins[i], 'photo': fileIDs[0]})
+	else :
+		request = 'https://api.telegram.org/bot' + token + '/sendMessage'
+		for i in range(len(admins)):
+			requests.get(request, {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
+			requests.get(request, {'chat_id': admins[i], 'text': 'NO PHOTOS IN QUEUE', 'parse_mode': 'Markdown'})
 	
 	print('report sent')
-
-
 
 
 
@@ -336,8 +347,6 @@ def initial_startup():
 
 
 
-
-
 def scheduled_post():
 	print('scheduled_post()')
 	#reinitialize all the lists and variables as global
@@ -350,8 +359,6 @@ def scheduled_post():
 	send_report()
 	
 	scheduler.run()
-
-
 
 
 
