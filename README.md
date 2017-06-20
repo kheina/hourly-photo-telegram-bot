@@ -21,6 +21,9 @@ it isn't running and it will add them all to the proper files once it is launche
 You may also run the http call https://api.telegram.org/bot [bot token] /getUpdates in your browser to
 determine what your bot id and channel id are.
 
+I'd also recommend looking through https://core.telegram.org/bots/api this resource for more information
+on telegram bots and how they work.
+
 Once you start the bot, admins should get a message on telegram from the bot with some information
 including the current delay and number of photos in the queue.
 
