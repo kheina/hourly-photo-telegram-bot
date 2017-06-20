@@ -280,6 +280,7 @@ def schedule_firstupdate():
 	global fileIDs
 	global delay
 	global timezone
+	global forwardList
 	global report
 	global scheduler
 	
@@ -298,7 +299,7 @@ def schedule_firstupdate():
 	if time.localtime(nextupdate).tm_min  < 10 : nexttime = nexttime + '0'
 	nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
 	
-	report = '`  bot started\ncurrent delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + noowtime + '`\n  next update: `' + nexttime
+	report = '`  bot started`\n`current delay: `' + str(delay) + '` minutes`\n`current queue: `' + str(len(fileIDs)) + '\n`     forwards: `' + str(len(forwardList)) + '\n` current time: `' + noowtime + '\n`  next update: `' + nexttime
 	report = report + '\n`next photo in queue: `'
 		
 	print('current time:', noowtime)
