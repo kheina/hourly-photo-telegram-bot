@@ -27,6 +27,7 @@ on telegram bots and how they work.
 Once you start the bot, admins should get a message on telegram from the bot with some information
 including the current delay and number of photos in the queue.
 
+## etc
 
 If you have any questions about how the bot works or are having trouble setting it up, feel free to
 send me an email and I'd be happy to help.
