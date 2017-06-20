@@ -18,7 +18,7 @@ your own information.
 The bot uses telegram's getUpdates method, so you can safely send it images and add it to groups while
 it isn't running and it will add them all to the proper files once it is launched.
 
-You may also run the http call https://api.telegram.org/bot [bot token] /getUpdates in your browser to
+You may also run the http call https://api.telegram.org/bot[botToken]/getUpdates in your browser to
 determine what your bot id and channel id are.
 
 I'd also recommend looking through https://core.telegram.org/bots/api this resource for more information
