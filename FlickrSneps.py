@@ -190,7 +190,31 @@ def update():
 	print()
 	
 	
-	report = post_photo()
+	print('sending photo to Flickr Sneps (id:-1001084745741)...')
+	if len(fileIDs) > 0 :
+		phototosend = fileIDs.pop(0)
+		sentPhoto = requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendPhoto', {'chat_id': -1001084745741, 'photo': phototosend})
+		sentPhoto = sentPhoto.json()
+		if sentPhoto['ok'] :
+			if len(fileIDs) < 10 :
+				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'] - 43)#number of posts that have been deleted from the channel
+			else :
+				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'] - 43)#number of posts that have been deleted from the channel
+			usedIDs.append(phototosend)
+			print('success.')
+			
+			#FORWARDING PHOTO
+			print('forwarding photo to', len(forwardList), 'chats')
+			for i in range(len(forwardList)):
+				requests.post('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/forwardMessage', {'chat_id': forwardList[i], 'from_chat_id': -1001084745741, 'message_id': sentPhoto['result']['message_id']})
+			report = report + '\n` forwarded to: `' + str(len(forwardList)) + '` chats`'
+			
+		else :
+			fileIDs.append(phototosend)
+			report = '`post failed.`\n`photo re-added to queue.`'
+			print('failed.')
+	else :
+		report = '`post failed.`\n`no photos in queue.`\nADD PHOTOS IMMEDIATELY'
 	
 	
 	#for i in range(len(admins)):
