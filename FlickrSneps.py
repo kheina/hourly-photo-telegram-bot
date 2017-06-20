@@ -328,8 +328,8 @@ def initial_startup():
 	global scheduler
 	
 	update()
-	schedule_firstupdate()
 	update_dropbox()
+	schedule_firstupdate()
 	send_report()
 	
 	scheduler.run()
@@ -345,8 +345,8 @@ def scheduled_post():
 	
 	update()
 	post_photo()
-	schedule_nextupdate()
 	update_dropbox()
+	schedule_nextupdate()
 	send_report()
 	
 	scheduler.run()
