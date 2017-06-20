@@ -5,7 +5,7 @@ import dropbox
 
 #initialize the dropbox folder
 dbx = dropbox.Dropbox('iPVSiTTotuYAAAAAAAEgnRwVETJXdTYNZ_b5QdezBhSF9QN97HhzU6EqObRElMaM')
-#iPVSiTTotuYAAAAAAAEgnRwVETJXdTYNZ_b5QdezBhSF9QN97HhzU6EqObRElMaM #dropbox access token
+#enter your dropbox access token in the ('') above
 
 #initialize the scheduler
 scheduler = sched.scheduler(time.time, time.sleep)
@@ -162,7 +162,19 @@ def update():
 		print('updateList empty')
 
 	print()
-	
+
+
+
+
+
+def update_dropbox() :
+	print('update_dropbox()')
+	#reinitialize all the lists and variables as global
+	global fileIDs
+	global usedIDs
+	global forwardList
+	global delay
+
 	print('uploading fileIDs.json to Dropbox')
 	dbx.files_upload(json.dumps(fileIDs    ).encode('utf-8'), '/fileIDs.json',       dropbox.files.WriteMode('overwrite', None))
 	print('uploading usedIDs.json to Dropbox')
@@ -172,6 +184,7 @@ def update():
 	print('uploading forwardList.json to Dropbox')
 	dbx.files_upload(json.dumps(forwardList).encode('utf-8'), '/forwardList.json',   dropbox.files.WriteMode('overwrite', None))
 	print()
+
 
 
 
@@ -316,6 +329,7 @@ def initial_startup():
 	
 	update()
 	schedule_firstupdate()
+	update_dropbox()
 	send_report()
 	
 	scheduler.run()
@@ -332,6 +346,7 @@ def scheduled_post():
 	update()
 	post_photo()
 	schedule_nextupdate()
+	update_dropbox()
 	send_report()
 	
 	scheduler.run()
