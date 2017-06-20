@@ -34,6 +34,7 @@ report = ''
 
 
 def update():
+	print('update()')
 	#reinitialize all the lists and variables as global
 	global token
 	global botID
@@ -44,42 +45,38 @@ def update():
 	global delay
 	global timezone
 	
-	#print('update()')
 	print('reading admins.json')
 	dbxadmins = dbx.files_download('/admins.json')
 	admins = dbxadmins[1].json()
 	print(len(admins), 'admins')
-	#print(dbxadmins[0])
-	#print(admins)
+	
 	print('reading fileIDs.json')
 	dbxfileIDs = dbx.files_download('/fileIDs.json')
 	fileIDs = dbxfileIDs[1].json()
 	print(len(fileIDs), 'file ids')
-	#print(dbxfileIDs[0])
-	#print(fileIDs)
+	
 	print('reading usedIDs.json')
 	dbxusedIDs = dbx.files_download('/usedIDs.json')
 	usedIDs = dbxusedIDs[1].json()
 	print(len(usedIDs), 'used ids')
-	#print(dbxusedIDs[0])
-	#print(usedIDs)
+	
 	print('reading forwardList.json')
-	dbxdelay = dbx.files_download('/forwardList.json')
-	forwardList = dbxdelay[1].json()
+	dbxforward = dbx.files_download('/forwardList.json')
+	forwardList = dbxforward[1].json()
 	print(len(forwardList), 'forwards')
-	#print(forwardList)
+	
 	print('reading delay.json')
 	dbxdelay = dbx.files_download('/delay.json')
 	delay = dbxdelay[1].json()
 	print(delay, 'minute delay')
-	#print(dbxdelay[0])
+
 	print('reading timezone.json')
 	dbxtime = dbx.files_download('/timezone.json')
 	timezone = dbxtime[1].json()
 	print('UTC', timezone)
-	#print(dbxtime[0])
 
 	print()
+	
 	print("getUpdates")
 	request = 'https://api.telegram.org/bot' + token + '/getUpdates'
 	response = requests.get(request)
