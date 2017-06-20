@@ -150,7 +150,7 @@ def update():
 				else :
 					print('update not from admin', end=' ')
 					if    'new_chat_member' in updateList[i]['message'] :
-						if updateList[i]['message']['new_chat_member']['id'] == 394580059 : #THIS IS THE BOT'S ID
+						if  updateList[i]['message']['new_chat_member']['id'] == 394580059 : #THIS IS THE BOT'S ID
 							forwardList.append(updateList[i]['message']['chat']['id'])
 							print('\nadded', updateList[i]['message']['chat']['title'], 'to forwardList')
 					elif 'left_chat_member' in updateList[i]['message'] :
@@ -197,9 +197,9 @@ def update():
 		sentPhoto = sentPhoto.json()
 		if sentPhoto['ok'] :
 			if len(fileIDs) < 10 :
-				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'] - 43)#number of posts that have been deleted from the channel
+				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'])
 			else :
-				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'] - 43)#number of posts that have been deleted from the channel
+				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'])
 			usedIDs.append(phototosend)
 			print('success.')
 			
