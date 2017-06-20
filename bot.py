@@ -197,7 +197,7 @@ def update_dropbox() :
 
 
 def post_photo():
-	print('running post_photo()')
+	print('post_photo()')
 	#reinitialize all the lists and variables as global
 	global token
 	global channel
