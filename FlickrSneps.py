@@ -17,7 +17,7 @@ usedIDs = []
 forwardList = []
 delay = 180
 timezone = -5
-report = ''
+report = 'temp'
 
 
 
@@ -267,38 +267,32 @@ def schedule_firstupdate():
 	global forwardList
 	global delay
 	global timezone
-    global report
+	global report
 	global scheduler
 	
-    nextupdate = currenttime = (time.time() + ((60*60) * timezone))
-    nextupdate = (nextupdate - (nextupdate % (delay * 60))) + (delay * 60)
- 
-    noowtime = ''
-    if time.localtime(currenttime).tm_hour < 10 : noowtime = noowtime + '0'
-    noowtime = noowtime + str(time.localtime(currenttime).tm_hour) + ':'
-    if time.localtime(currenttime).tm_min  < 10 : noowtime = noowtime + '0'
-    noowtime = noowtime + str(time.localtime(currenttime).tm_min)
- 
-    nexttime = ''
-    if time.localtime(nextupdate).tm_hour < 10 : nexttime = nexttime + '0'
-    nexttime = nexttime + str(time.localtime(nextupdate).tm_hour) + ':'
-    if time.localtime(nextupdate).tm_min  < 10 : nexttime = nexttime + '0'
-    nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
- 
-    report = '`flickrsneps started\ncurrent delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + noowtime + '`\n  next update: `' + nexttime
-    report = report + '\n`next photo in queue: `'
-    for i in range(len(admins)):
-        requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendMessage', {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
-        if len(fileIDs) > 0 :
-            requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendPhoto', {'chat_id': admins[i], 'photo': fileIDs[0]})
-        else :
-            requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendMessage', {'chat_id': admins[i], 'text': 'NO PHOTOS IN QUEUE', 'parse_mode': 'Markdown'})
-     
-    print('current time:', noowtime)
-    print(' next update:', nexttime)
-    print('flickrsneps started. scheduling first post...')
-    print('scheduling update for', nexttime)
-    scheduler.enterabs((nextupdate - ((60*60) * timezone)), 1, scheduled_post, ())
+	nextupdate = currenttime = (time.time() + ((60*60) * timezone))
+	nextupdate = (nextupdate - (nextupdate % (delay * 60))) + (delay * 60)
+	
+	noowtime = ''
+	if time.localtime(currenttime).tm_hour < 10 : noowtime = noowtime + '0'
+	noowtime = noowtime + str(time.localtime(currenttime).tm_hour) + ':'
+	if time.localtime(currenttime).tm_min  < 10 : noowtime = noowtime + '0'
+	noowtime = noowtime + str(time.localtime(currenttime).tm_min)
+
+	nexttime = ''
+	if time.localtime(nextupdate).tm_hour < 10 : nexttime = nexttime + '0'
+	nexttime = nexttime + str(time.localtime(nextupdate).tm_hour) + ':'
+	if time.localtime(nextupdate).tm_min  < 10 : nexttime = nexttime + '0'
+	nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
+	
+	report = '`flickrsneps started\ncurrent delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + noowtime + '`\n  next update: `' + nexttime
+	report = report + '\n`next photo in queue: `'
+		
+	print('current time:', noowtime)
+	print(' next update:', nexttime)
+	print('flickrsneps started. scheduling first post...')
+	print('scheduling update for', nexttime)
+	scheduler.enterabs((nextupdate - ((60*60) * timezone)), 1, scheduled_post, ())
 
 
 
@@ -322,6 +316,8 @@ def send_report():
 			requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendPhoto', {'chat_id': admins[i], 'photo': fileIDs[0]})
 		else :
 			requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendMessage', {'chat_id': admins[i], 'text': 'NO PHOTOS IN QUEUE', 'parse_mode': 'Markdown'})
+	
+	print('report sent')
 
 
 
