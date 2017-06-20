@@ -1,1 +1,1 @@
-worker: python FlickrSneps.py
+worker: python bot.py

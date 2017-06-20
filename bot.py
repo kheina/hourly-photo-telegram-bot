@@ -27,7 +27,7 @@ admins = [000000000]	#this is in case the admin download from dropbox fails
 fileIDs = []
 usedIDs = []
 forwardList = []
-delay = 60
+delay = 060
 timezone = 0
 report = ''
 
