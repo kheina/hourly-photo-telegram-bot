@@ -17,7 +17,7 @@ usedIDs = []
 forwardList = []
 delay = 180
 timezone = -5
-report = 'temp'
+report = ''
 
 
 
@@ -31,8 +31,6 @@ def update():
 	global forwardList
 	global delay
 	global timezone
-	global report
-	global scheduler
 	
 	#print('update()')
 	print('reading admins.json')
@@ -186,7 +184,6 @@ def post_photo():
 	global usedIDs
 	global forwardList
 	global report
-	global scheduler
 	
 	print('sending photo to Flickr Sneps (id:-1001084745741)...')
 	if len(fileIDs) > 0 :
@@ -221,10 +218,7 @@ def post_photo():
 def schedule_nextupdate():
 	print('schedule_nextupdate()')
 	#reinitialize all the lists and variables as global
-	global admins
 	global fileIDs
-	global usedIDs
-	global forwardList
 	global delay
 	global timezone
 	global report
@@ -261,10 +255,7 @@ def schedule_nextupdate():
 def schedule_firstupdate():
 	print('schedule_firstupdate()')
 	#reinitialize all the lists and variables as global
-	global admins
 	global fileIDs
-	global usedIDs
-	global forwardList
 	global delay
 	global timezone
 	global report
@@ -303,12 +294,7 @@ def send_report():
 	#reinitialize all the lists and variables as global
 	global admins
 	global fileIDs
-	global usedIDs
-	global forwardList
-	global delay
-	global timezone
 	global report
-	global scheduler
 	
 	for i in range(len(admins)):
 		requests.get('https://api.telegram.org/bot394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c/sendMessage', {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
@@ -326,13 +312,6 @@ def send_report():
 def initial_startup():
 	print('initial_startup()')
 	#reinitialize all the lists and variables as global
-	global admins
-	global fileIDs
-	global usedIDs
-	global forwardList
-	global delay
-	global timezone
-	global report
 	global scheduler
 	
 	update()
@@ -348,13 +327,6 @@ def initial_startup():
 def scheduled_post():
 	print('scheduled_post()')
 	#reinitialize all the lists and variables as global
-	global admins
-	global fileIDs
-	global usedIDs
-	global forwardList
-	global delay
-	global timezone
-	global report
 	global scheduler
 	
 	update()
