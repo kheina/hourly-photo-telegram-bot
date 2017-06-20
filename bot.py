@@ -23,12 +23,12 @@ botID = 000000000
 scheduler = sched.scheduler(time.time, time.sleep)
 
 #initialize all the lists and variables
-admins = [118819437]	#this is in case the admin download from dropbox fails
+admins = [000000000]	#this is in case the admin download from dropbox fails
 fileIDs = []
 usedIDs = []
 forwardList = []
-delay = 180
-timezone = -5
+delay = 060
+timezone = -0
 report = ''
 
 
@@ -363,25 +363,3 @@ def scheduled_post():
 
 
 initial_startup()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
