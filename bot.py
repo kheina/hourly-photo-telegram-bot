@@ -298,7 +298,7 @@ def schedule_firstupdate():
 	if time.localtime(nextupdate).tm_min  < 10 : nexttime = nexttime + '0'
 	nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
 	
-	report = '`bot started\ncurrent delay: `' + str(delay) + '` min\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + noowtime + '`\n  next update: `' + nexttime
+	report = '`   bot started\ncurrent delay: `' + str(delay) + '` min\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + noowtime + '`\n  next update: `' + nexttime
 	report = report + '\n`next photo in queue: `'
 		
 	print('current time:', noowtime)
