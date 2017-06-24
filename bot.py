@@ -268,7 +268,7 @@ def schedule_nextupdate():
 	scheduler.enterabs((nextupdate - ((60*60) * timezone)), 1, scheduled_post, ())
 	report = report + '\n`current delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + noowtime + '`\n  next update: `' + nexttime
 	if len(fileIDs) < 10 : report = report + '\nLOW ON PHOTOS'
-	report = report + '\n`next photo in queue: `'
+	#report = report + '\n`next photo in queue: `'
 
 
 
@@ -298,7 +298,7 @@ def schedule_firstupdate():
 	nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
 	
 	report = '`  bot started`\n`current delay: `' + str(delay) + '` minutes`\n`current queue: `' + str(len(fileIDs)) + '\n`     forwards: `' + str(len(forwardList)) + '\n` current time: `' + noowtime + '\n`  next update: `' + nexttime
-	report = report + '\n`next photo in queue: `'
+	#report = report + '\n`next photo in queue: `'
 		
 	print('current time:', noowtime)
 	print(' next update:', nexttime)
@@ -321,7 +321,7 @@ def send_report():
 		request2 = 'https://api.telegram.org/bot' + token + '/sendPhoto'
 		for i in range(len(admins)):
 			requests.get(request1, {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
-			requests.get(request2, {'chat_id': admins[i], 'photo': fileIDs[0]})
+			#requests.get(request2, {'chat_id': admins[i], 'photo': fileIDs[0]})
 	else :
 		request = 'https://api.telegram.org/bot' + token + '/sendMessage'
 		for i in range(len(admins)):
