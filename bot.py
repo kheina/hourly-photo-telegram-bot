@@ -44,6 +44,8 @@ def update():
 	global forwardList
 	global delay
 	global timezone
+	global report
+	report = ''
 	
 	print('reading admins.json')
 	dbxadmins = dbx.files_download('/admins.json')
@@ -137,11 +139,13 @@ def update():
 						if  updateList[i]['message']['new_chat_member']['id'] == botID :
 							forwardList.append(updateList[i]['message']['chat']['id'])
 							print('\nadded', updateList[i]['message']['chat']['title'], 'to forwardList')
+							report = report + '`added `' + str(updateList[i]['message']['chat']['title']) + '` to forwardList`\n'
 					elif 'left_chat_member' in updateList[i]['message'] :
 						if updateList[i]['message']['left_chat_member']['id'] == botID :
 							if updateList[i]['message']['chat']['id'] in forwardList :
 								forwardList.remove(updateList[i]['message']['chat']['id'])
 								print('\nremoved', updateList[i]['message']['chat']['title'], 'from forwardList')
+								report = report + '`removed `' + str(updateList[i]['message']['chat']['title']) + ' `from forwardList`\n'
 					else :			
 						if 'from' in updateList[i]['message'] :
 							if 'username' in updateList[i]['message']['from'] :
@@ -172,6 +176,41 @@ def update():
 	else :
 		print('updateList empty')
 
+	print()
+
+
+
+def report_forwards() :
+	print('report_forwards()')
+	global token
+	global forwardList
+	global report
+	global admins
+	report = ''
+	
+	print('reading forwardList.json')
+	dbxforward = dbx.files_download('/forwardList.json')
+	forwardList = dbxforward[1].json()
+	print(len(forwardList), 'forwards')
+	print()
+	
+	request = 'https://api.telegram.org/bot' + token + '/getChat'
+	
+	for i in range(len(forwardList)):
+		response = requests.get(request, {'chat_id': forwardList[i]})
+		response = response.json()
+		if response['ok'] :
+			print('forward[', str(i),']: ', response, sep='')
+			report = report + '`forward[' + str(i) + ']: `' + response['result']['title'] + '\n'
+		else :
+			print('response not ok')
+	
+	print('uploading forwardList.json to Dropbox')
+	dbx.files_upload(json.dumps(forwardList).encode('utf-8'), '/forwardList.json',   dropbox.files.WriteMode('overwrite', None))
+	
+	request = 'https://api.telegram.org/bot' + token + '/sendMessage'
+	for i in range(len(admins)):
+		requests.get(request, {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
 	print()
 
 
@@ -214,9 +253,9 @@ def post_photo():
 		sentPhoto = sentPhoto.json()
 		if sentPhoto['ok'] :
 			if len(fileIDs) < 10 :
-				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'])
+				report = report + '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'])
 			else :
-				report = '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'])
+				report = report + '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'])
 			usedIDs.append(phototosend)
 			print('success.')
 			
@@ -229,10 +268,10 @@ def post_photo():
 			
 		else :
 			fileIDs.append(phototosend)
-			report = '`post failed.`\n`photo re-added to queue.`'
+			report = report + '`post failed.`\n`photo re-added to queue.`'
 			print('failed.')
 	else :
-		report = '`post failed.`\n`no photos in queue.`\nADD PHOTOS IMMEDIATELY'
+		report = report + '`post failed.`\n`no photos in queue.`\nADD PHOTOS IMMEDIATELY'
 
 
 
@@ -260,15 +299,16 @@ def schedule_nextupdate():
 	if time.localtime(nextupdate).tm_min  < 10 : nexttime = nexttime + '0'
 	nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
 
+	report = report + '\n`current delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + noowtime + '`\n  next update: `' + nexttime
+	if len(fileIDs) < 10 : report = report + '\nLOW ON PHOTOS'
+	#report = report + '\n`next photo in queue: `'
+	
 	print('current time:', noowtime)
 	print(' next update:', nexttime)
 	print()
 	print('scheduling update for', (delay), 'minutes from now')
 	#scheduler.enter((delay * 60), 1, scheduled_post, ())
 	scheduler.enterabs((nextupdate - ((60*60) * timezone)), 1, scheduled_post, ())
-	report = report + '\n`current delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + noowtime + '`\n  next update: `' + nexttime
-	if len(fileIDs) < 10 : report = report + '\nLOW ON PHOTOS'
-	#report = report + '\n`next photo in queue: `'
 
 
 
@@ -297,7 +337,7 @@ def schedule_firstupdate():
 	if time.localtime(nextupdate).tm_min  < 10 : nexttime = nexttime + '0'
 	nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
 	
-	report = '`  bot started`\n`current delay: `' + str(delay) + '` minutes`\n`current queue: `' + str(len(fileIDs)) + '\n`     forwards: `' + str(len(forwardList)) + '\n` current time: `' + noowtime + '\n`  next update: `' + nexttime
+	report = report + '`  bot started`\n`current delay: `' + str(delay) + '` minutes`\n`current queue: `' + str(len(fileIDs)) + '\n`     forwards: `' + str(len(forwardList)) + '\n` current time: `' + noowtime + '\n`  next update: `' + nexttime
 	#report = report + '\n`next photo in queue: `'
 		
 	print('current time:', noowtime)
