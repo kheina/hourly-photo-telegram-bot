@@ -139,7 +139,7 @@ def update():
 						if  updateList[i]['message']['new_chat_member']['id'] == botID :
 							forwardList.append(updateList[i]['message']['chat']['id'])
 							print('\nadded', updateList[i]['message']['chat']['title'], 'to forwardList')
-							report = report + '`added `' + str(updateList[i]['message']['chat']['title']) + '` to forwardList`\n'
+							report = report + '`added `' + str(updateList[i]['message']['chat']['title']) + '` to forwardList by `' + str(updateList[i]['message']['from']['username']) + '\n'
 					elif 'left_chat_member' in updateList[i]['message'] :
 						if updateList[i]['message']['left_chat_member']['id'] == botID :
 							if updateList[i]['message']['chat']['id'] in forwardList :
