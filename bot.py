@@ -274,12 +274,12 @@ def post_photo():
 					getchat = requests.get('https://api.telegram.org/bot' + token + '/getChat', {'chat_id': forwardList[i]})
 					getchat = getchat.json()
 					if getchat['ok'] :
-						print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat['result']['title'])
-						report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`)` ' + getchat['result']['title']
+						print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + str(getchat['result']['title']))
+						report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`)` ' + str(getchat['result']['title'])
 					else :
 						if 'description' in getchat :
-							print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat['description']
-							report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`)` ' + getchat['description']
+							print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + str(getchat['description'])
+							report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`)` ' + str(getchat['description'])
 							if 'Forbidden' in getchat['description']
 								forwardList.remove(forwardList[i])
 								report = report + '\n` removed `' + str(forwardList[i]) + '` from forward list`'
