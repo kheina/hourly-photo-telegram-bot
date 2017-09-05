@@ -265,20 +265,20 @@ def post_photo():
 			
 			#FORWARDING PHOTO
 			sentPhoto = sentPhoto.json()
-			print 'forwarding photo to', len(forwardList), 'chats'
+			print('forwarding photo to', len(forwardList), 'chats')
 			request = 'https://api.telegram.org/bot' + token + '/forwardMessage'
 			for i in range(len(forwardList)):
 				response = requests.get(request, data = {'chat_id': forwardList[i], 'from_chat_id': channel, 'message_id': sentPhoto['result']['message_id']})
 				if response.json()['ok'] :
-					print 'forward[' + str(i) + '] ok'
+					print('forward[' + str(i) + '] ok')
 				else :
 					getchat = requests.get('https://api.telegram.org/bot' + token + '/getChat', {'chat_id': forwardList[i]})
-					print 'forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat.json()['result']['title']
+					print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat.json()['result']['title'])
 					report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`)` ' + getchat.json()['result']['title']
 					sendReport = True
 			report = report + '\n` forwarded to: `' + str(len(forwardList)) + '` chats`'
 		else :
-			print 'sentPhoto not ok, skipping forwards'
+			print('sentPhoto not ok, skipping forwards')
 			sendReport = True
 		else :
 			fileIDs.append(phototosend)
