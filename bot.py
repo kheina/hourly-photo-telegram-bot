@@ -275,11 +275,11 @@ def post_photo():
 					getchat = getchat.json()
 					if getchat['ok'] :
 						print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat['result']['title'])
-						report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`) ` ' + getchat['result']['title']
+						report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`) `' + getchat['result']['title']
 					else :
 						if 'description' in getchat :
 							print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat['description']
-							report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`) ` ' #+ getchat['description']
+							report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`) `'
 							if 'Forbidden' in getchat['description']
 								forwardList.remove(forwardList[i])
 								report = report + '\n` removed `' + str(forwardList[i]) + '` from forward list`'
