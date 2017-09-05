@@ -248,6 +248,7 @@ def post_photo():
 	global usedIDs
 	global forwardList
 	global report
+	removeList = []
 	
 	print('sending photo to chat_id:', channel, '...', sep='')
 	if len(fileIDs) > 0 :
@@ -266,7 +267,7 @@ def post_photo():
 			#FORWARDING PHOTO
 			print('forwarding photo to', len(forwardList), 'chats')
 			request = 'https://api.telegram.org/bot' + token + '/forwardMessage'
-			for i in range(len(forwardList)):
+			for i in range(len(forwardList)) :
 				response = requests.get(request, data = {'chat_id': forwardList[i], 'from_chat_id': channel, 'message_id': sentPhoto['result']['message_id']})
 				if response.json()['ok'] :
 					print('forward[' + str(i) + '] ok')
@@ -281,7 +282,7 @@ def post_photo():
 							print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat['description'])
 							report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`) `' + getchat['description']
 							if 'Forbidden' in getchat['description'] :
-								forwardList.pop(i)
+								removeList.append(forwardList[i])
 								report = report + '\n` removed `' + str(forwardList[i]) + '` from forward list`'
 						else :
 							print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ')')
@@ -297,6 +298,9 @@ def post_photo():
 	else :
 		report = report + '`post failed.`\n`no photos in queue.`\nADD PHOTOS IMMEDIATELY'
 		sendReport = True
+	if len(removeList) > 0 :
+		for i in range(len(removeList)) :
+			forwardList.remove(removeList[i])
 
 
 
