@@ -139,7 +139,7 @@ def update():
 					if    'new_chat_member' in updateList[i]['message'] :
 						if  updateList[i]['message']['new_chat_member']['id'] == botID :
 							forwardList.append(updateList[i]['message']['chat']['id'])
-							print('\nadded', updateList[i]['message']['chat']['title'], 'to forwardList')
+							print('added ', updateList[i]['message']['chat']['title'], ' (', updateList[i]['message']['chat']['id'], ') to forwardList by ', str(updateList[i]['message']['from']['username']), ' (', updateList[i]['message']['from']['id'], ')', sep='')
 							report = report + '`added `' + str(updateList[i]['message']['chat']['title']) + '` to forwardList by `' + str(updateList[i]['message']['from']['username']) + '\n'
 							sendReport = True
 					elif 'left_chat_member' in updateList[i]['message'] :
@@ -204,17 +204,18 @@ def report_forwards() :
 		response = requests.get(request, {'chat_id': forwardList[i]})
 		response = response.json()
 		if response['ok'] :
-			print('forward[', str(i),']: ', response, sep='')
+			print('forward[', str(i),']: (', str(response['result']['id']), ') ', response['result']['title'], sep='')
 			report = report + '`forward[' + str(i) + ']: `' + response['result']['title'] + '\n'
 		else :
-			print('response not ok')
+			print('forward[', str(i),']: (', str(forwardList[i]), ') ', response['description'], sep='')
 	
-	print('uploading forwardList.json to Dropbox')
-	dbx.files_upload(json.dumps(forwardList).encode('utf-8'), '/forwardList.json',   dropbox.files.WriteMode('overwrite', None))
+	#print('uploading forwardList.json to Dropbox')
+	#dbx.files_upload(json.dumps(forwardList).encode('utf-8'), '/forwardList.json',   dropbox.files.WriteMode('overwrite', None))
 	
-	request = 'https://api.telegram.org/bot' + token + '/sendMessage'
-	for i in range(len(admins)):
-		requests.get(request, {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
+	#request = 'https://api.telegram.org/bot' + token + '/sendMessage'
+	#for i in range(len(admins)):
+	#	requests.get(request, {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
+	print(report)
 	print()
 
 
@@ -406,6 +407,7 @@ def initial_startup():
 	#reinitialize all the lists and variables as global
 	global scheduler
 	
+	#report_forwards()
 	update()
 	update_dropbox()
 	schedule_firstupdate()
