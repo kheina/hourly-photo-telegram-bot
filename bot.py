@@ -279,8 +279,6 @@ def post_photo():
 			report = report + '\n` forwarded to: `' + str(len(forwardList)) + '` chats`'
 		else :
 			print('sentPhoto not ok, skipping forwards')
-			sendReport = True
-		else :
 			fileIDs.append(phototosend)
 			report = report + '`post failed.`\n`photo re-added to queue.`'
 			print('failed.')
