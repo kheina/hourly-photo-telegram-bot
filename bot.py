@@ -30,6 +30,7 @@ forwardList = []
 delay = 180
 timezone = -5
 report = ''
+sendReport = False
 
 
 
@@ -140,12 +141,14 @@ def update():
 							forwardList.append(updateList[i]['message']['chat']['id'])
 							print('\nadded', updateList[i]['message']['chat']['title'], 'to forwardList')
 							report = report + '`added `' + str(updateList[i]['message']['chat']['title']) + '` to forwardList by `' + str(updateList[i]['message']['from']['username']) + '\n'
+							sendReport = True
 					elif 'left_chat_member' in updateList[i]['message'] :
 						if updateList[i]['message']['left_chat_member']['id'] == botID :
 							if updateList[i]['message']['chat']['id'] in forwardList :
 								forwardList.remove(updateList[i]['message']['chat']['id'])
 								print('\nremoved', updateList[i]['message']['chat']['title'], 'from forwardList')
 								report = report + '`removed `' + str(updateList[i]['message']['chat']['title']) + ' `from forwardList`\n'
+								sendReport = True
 					else :			
 						if 'from' in updateList[i]['message'] :
 							if 'username' in updateList[i]['message']['from'] :
@@ -173,6 +176,7 @@ def update():
 					print('updateList not empty, repeating...')
 			else :
 				print('failed')
+				sendReport = True
 	else :
 		print('updateList empty')
 
@@ -250,8 +254,8 @@ def post_photo():
 		phototosend = fileIDs.pop(0)
 		request = 'https://api.telegram.org/bot' + token + '/sendPhoto'
 		sentPhoto = requests.get(request, {'chat_id': channel, 'photo': phototosend})
-		sentPhoto = sentPhoto.json()
-		if sentPhoto['ok'] :
+		if sentPhoto.json()['ok'] :
+			sentPhoto = sentPhoto.json()
 			if len(fileIDs) < 10 :
 				report = report + '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'])
 			else :
@@ -260,18 +264,30 @@ def post_photo():
 			print('success.')
 			
 			#FORWARDING PHOTO
-			print('forwarding photo to', len(forwardList), 'chats')
+			sentPhoto = sentPhoto.json()
+			print 'forwarding photo to', len(forwardList), 'chats'
 			request = 'https://api.telegram.org/bot' + token + '/forwardMessage'
 			for i in range(len(forwardList)):
-				requests.post(request, {'chat_id': forwardList[i], 'from_chat_id': channel, 'message_id': sentPhoto['result']['message_id']})
+				response = requests.get(request, data = {'chat_id': forwardList[i], 'from_chat_id': channel, 'message_id': sentPhoto['result']['message_id']})
+				if response.json()['ok'] :
+					print 'forward[' + str(i) + '] ok'
+				else :
+					getchat = requests.get('https://api.telegram.org/bot' + token + '/getChat', {'chat_id': forwardList[i]})
+					print 'forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat.json()['result']['title']
+					report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`)` ' + getchat.json()['result']['title']
+					sendReport = True
 			report = report + '\n` forwarded to: `' + str(len(forwardList)) + '` chats`'
-			
+		else :
+			print 'sentPhoto not ok, skipping forwards'
+			sendReport = True
 		else :
 			fileIDs.append(phototosend)
 			report = report + '`post failed.`\n`photo re-added to queue.`'
 			print('failed.')
+			sendReport = True
 	else :
 		report = report + '`post failed.`\n`no photos in queue.`\nADD PHOTOS IMMEDIATELY'
+		sendReport = True
 
 
 
@@ -395,8 +411,9 @@ def scheduled_post():
 	post_photo()
 	update_dropbox()
 	schedule_nextupdate()
-	send_report()
-	
+	if sendReport :
+		send_report()
+	sendReport = False
 	scheduler.run()
 
 
