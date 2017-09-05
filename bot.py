@@ -272,8 +272,12 @@ def post_photo():
 					print('forward[' + str(i) + '] ok')
 				else :
 					getchat = requests.get('https://api.telegram.org/bot' + token + '/getChat', {'chat_id': forwardList[i]})
-					print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat.json()['result']['title'])
-					report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`)` ' + getchat.json()['result']['title']
+					if getchat.json()['ok'] :
+						print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat.json()['result']['title'])
+						report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`)` ' + getchat.json()['description']
+					else :
+						print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat.json()['result']['title']
+						report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`)` ' + getchat.json()['description']
 					sendReport = True
 			report = report + '\n` forwarded to: `' + str(len(forwardList)) + '` chats`'
 		else :
