@@ -264,7 +264,6 @@ def post_photo():
 			print('success.')
 			
 			#FORWARDING PHOTO
-			sentPhoto = sentPhoto.json()
 			print('forwarding photo to', len(forwardList), 'chats')
 			request = 'https://api.telegram.org/bot' + token + '/forwardMessage'
 			for i in range(len(forwardList)):
