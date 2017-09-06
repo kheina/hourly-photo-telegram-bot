@@ -46,6 +46,7 @@ def update():
 	global delay
 	global timezone
 	global report
+	global sendReport	
 	report = ''
 	
 	print('reading admins.json')
@@ -249,6 +250,7 @@ def post_photo():
 	global usedIDs
 	global forwardList
 	global report
+	global sendReport	
 	removeList = []
 	
 	print('sending photo to chat_id:', channel, '...', sep='')
@@ -421,6 +423,7 @@ def scheduled_post():
 	print('scheduled_post()')
 	#reinitialize all the lists and variables as global
 	global scheduler
+	global sendReport	
 	
 	update()
 	post_photo()
