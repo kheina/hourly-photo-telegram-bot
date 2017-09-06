@@ -413,13 +413,13 @@ def initial_startup():
 	#reinitialize all the lists and variables as global
 	global scheduler
 	
-	report_forwards()
-	#update()
-	#update_dropbox()
-	#schedule_firstupdate()
-	#send_report()
+	#report_forwards()
+	update()
+	update_dropbox()
+	schedule_firstupdate()
+	send_report()
 	
-	#scheduler.run()
+	scheduler.run()
 
 
 
