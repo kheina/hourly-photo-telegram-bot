@@ -216,7 +216,8 @@ def report_forwards() :
 	#request = 'https://api.telegram.org/bot' + token + '/sendMessage'
 	#for i in range(len(admins)):
 	#	requests.get(request, {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
-	print(report)
+	
+	#print(report)
 	print()
 
 
@@ -290,6 +291,7 @@ def post_photo():
 						else :
 							print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ')')
 							report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`)`'
+					print('raw response:', response.json())
 					sendReport = True
 			report = report + '\n` forwarded to: `' + str(len(forwardList)) + '` chats`'
 		else :
@@ -409,13 +411,13 @@ def initial_startup():
 	#reinitialize all the lists and variables as global
 	global scheduler
 	
-	#report_forwards()
-	update()
-	update_dropbox()
-	schedule_firstupdate()
-	send_report()
+	report_forwards()
+	#update()
+	#update_dropbox()
+	#schedule_firstupdate()
+	#send_report()
 	
-	scheduler.run()
+	#scheduler.run()
 
 
 
