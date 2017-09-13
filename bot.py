@@ -319,6 +319,7 @@ def schedule_nextupdate():
 	global timezone
 	global report
 	global scheduler
+	global sendReport
 	
 	nextupdate = currenttime = (time.time() + ((60*60) * timezone))
 	nextupdate = (nextupdate - (nextupdate % (delay * 60))) + (delay * 60)
@@ -336,7 +337,9 @@ def schedule_nextupdate():
 	nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
 
 	report = report + '\n`current delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + noowtime + '`\n  next update: `' + nexttime
-	if len(fileIDs) < 10 : report = report + '\nLOW ON PHOTOS'
+	if len(fileIDs) < 10 :
+		report = report + '\nLOW ON PHOTOS'
+		sendReport = True
 	#report = report + '\n`next photo in queue: `'
 	
 	print('current time:', noowtime)
