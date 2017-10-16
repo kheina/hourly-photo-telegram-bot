@@ -4,26 +4,26 @@ import sched, time
 import dropbox
 
 #initialize the dropbox folder
-dbx = dropbox.Dropbox('iPVSiTTotuYAAAAAAAEgnRwVETJXdTYNZ_b5QdezBhSF9QN97HhzU6EqObRElMaM')
+dbx = dropbox.Dropbox('YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY')
 #enter your dropbox access token in the ('') above
 
 #telegram bot auth token (given by @BotFather upon your bot's creation)
-token = '394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c'
+token = 'XXXXXXXXX:YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY'
 #enter your telegram bot's auth token in the '' above
 
 #the chat_id of the channel where all the pictures will be posted
-channel = -1001084745741
+channel = -XXXXXXXXXXXXX
 #enter your telegram channel's chat_id after the = above
 
 #the id of the bot itself
-botID = 394580059
+botID = XXXXXXXXX
 #enter your telegram bot's id after the = above
 
 #initialize the scheduler
 scheduler = sched.scheduler(time.time, time.sleep)
 
 #initialize all the lists and variables
-admins = [118819437]	#this is in case the admin download from dropbox fails
+admins = []	#this is in case the admin download from dropbox fails
 fileIDs = []
 usedIDs = []
 forwardList = []
