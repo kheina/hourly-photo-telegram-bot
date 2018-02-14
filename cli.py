@@ -10,15 +10,15 @@ def cls():
 	print('(c) 2017 Snep Corporation. All rights reserved.\n')
 
 #initialize the dropbox folder
-dbx = dropbox.Dropbox('YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY')
+dbx = dropbox.Dropbox('iPVSiTTotuYAAAAAAAEu9Wd6M_ltY0K0amq3pGvEB6NAUAcvVBOUllG4ErHFM8sq')
 #enter your dropbox access token in the ('') above
 
 #telegram bot auth token (given by @BotFather upon your bot's creation)
-token = 'XXXXXXXXX:YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY'
+token = '394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c'
 #enter your telegram bot's auth token in the '' above
 
 #the id of the bot itself
-botID = XXXXXXXXX
+botID = 394580059
 #enter your telegram bot's id after the = above
 
 #initialize all the lists and variables
@@ -36,7 +36,7 @@ optionalCommandsList = {}
 optionalCommandsList['getChat'] = ['>send request', 'chat_id']
 optionalCommandsList['getChatAdministrators'] = ['>send request', 'chat_id']
 optionalCommandsList['getUpdates']  = ['>send request', '>clear updates', 'offset', 'limit', 'timeout']
-optionalCommandsList['sendMessage'] = ['>send request', 'chat_id', 'text', 'parse_mode', 'disable_web_page_preview', 'disable_notification', 'reply_to_message_id', 'reply_markup', ]
+optionalCommandsList['sendMessage'] = ['>send request', 'chat_id', 'text', 'parse_mode', 'disable_web_page_preview', 'disable_notification', 'reply_to_message_id', 'reply_markup']
 optionalCommandsList['sendPhoto']   = ['>send request', 'chat_id', 'photo', 'caption', 'disable_notification', 'reply_to_message_id']
 optionalCommandsList['parse_mode'] = ['Markdown', 'HTML']
 optionalCommandsList['disable_web_page_preview'] = ['true', 'false']
