@@ -166,7 +166,7 @@ def update():
 			mostrecentupdate = updateList[len(updateList) - 1]['update_id']
 			print('clearing updateList through to update_id', mostrecentupdate + 1)
 			request = 'https://api.telegram.org/bot' + token + '/getUpdates'
-			response = requests.get(request, {'offset': mostrecentupdate + 1})
+			response = requests.get(request + '?offset=' + str(mostrecentupdate + 1))
 			response = response.json()
 			if response['ok'] :
 				updateList = response['result']
@@ -202,7 +202,7 @@ def report_forwards() :
 	request = 'https://api.telegram.org/bot' + token + '/getChat'
 	
 	for i in range(len(forwardList)):
-		response = requests.get(request, {'chat_id': forwardList[i]})
+		response = requests.get(request + '?chat_id=' + str(forwardList[i]))
 		response = response.json()
 		if response['ok'] :
 			print('forward[', str(i),']: (', str(response['result']['id']), ') ', response['result']['title'], sep='')
@@ -258,7 +258,7 @@ def post_photo():
 	if len(fileIDs) > 0 :
 		phototosend = fileIDs.pop(0)
 		request = 'https://api.telegram.org/bot' + token + '/sendPhoto'
-		sentPhoto = requests.get(request, {'chat_id': channel, 'photo': phototosend})
+		sentPhoto = requests.get(request + '?chat_id=' + str(channel) + '&photo=' + phototosend)
 		if sentPhoto.json()['ok'] :
 			sentPhoto = sentPhoto.json()
 			if len(fileIDs) < 10 :
@@ -278,7 +278,7 @@ def post_photo():
 					successfulForwards = successfulForwards + 1
 					print('forward[' + str(i) + '] ok')
 				else :
-					getchat = requests.get('https://api.telegram.org/bot' + token + '/getChat', {'chat_id': forwardList[i]})
+					getchat = requests.get('https://api.telegram.org/bot' + token + '/getChat?chat_id=' + str(forwardList[i]))
 					getchat = getchat.json()
 					if getchat['ok'] :
 						print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat['result']['title'])
@@ -401,16 +401,19 @@ def send_report():
 	global report
 	
 	if len(fileIDs) > 0 :
-		request1 = 'https://api.telegram.org/bot' + token + '/sendMessage'
-		request2 = 'https://api.telegram.org/bot' + token + '/sendPhoto'
+		request = 'https://api.telegram.org/bot' + token + '/sendMessage'
 		for i in range(len(admins)):
-			requests.get(request1, {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
-			#requests.get(request2, {'chat_id': admins[i], 'photo': fileIDs[0]})
+			response = requests.get(request + '?chat_id=' + str(admins[i]) + '&text=' + report + '&parse_mode=Markdown')
+			response = response.json()
+			if response['ok'] :
+				print('report[' + str(i) + ']: ok')
+			else :
+				print('report[' + str(i) + ']: failed (' + str(admins[i]) + ')')				
 	else :
 		request = 'https://api.telegram.org/bot' + token + '/sendMessage'
 		for i in range(len(admins)):
-			requests.get(request, {'chat_id': admins[i], 'text': report, 'parse_mode': 'Markdown'})
-			requests.get(request, {'chat_id': admins[i], 'text': 'NO PHOTOS IN QUEUE', 'parse_mode': 'Markdown'})
+			requests.get(request + '?chat_id=' + str(admins[i]) + '&text=' + report + '&parse_mode=Markdown')
+			requests.get(request + '?chat_id=' + str(admins[i]) + '&text=NO PHOTOS IN QUEUE&parse_mode=Markdown')
 	
 	print('report sent')
 
