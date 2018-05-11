@@ -292,10 +292,13 @@ def post_photo():
 								report = report + '\n` removed `' + str(forwardList[i]) + '` from forward list`'
 						else :
 							print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ')')
-							report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`)`'
+							report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`)'
+					if 'description' in response.json() :
+						report = report + ' reason: `' + response.json()['description']
+					else :
+						report = report + '`'
 					print('raw response:', response.json())
-					print('raw command1:', response.url)
-					print('raw command2:', request + '?chat_id=' + str(forwardList[i]) + '&from_chat_id=' + str(channel) + '&message_id=' + str(sentPhoto['result']['message_id']))
+					print('raw command:', response.url)
 					sendReport = True
 			report = report + '\n` forwarded to: `' + str(successfulForwards) + '` chats`'
 		else :
