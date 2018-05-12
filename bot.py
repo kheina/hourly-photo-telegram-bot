@@ -408,7 +408,9 @@ def send_report():
 			if response['ok'] :
 				print('report[' + str(i) + ']: ok')
 			else :
-				print('report[' + str(i) + ']: failed (' + str(admins[i]) + ')')				
+				print('report[' + str(i) + ']: failed (' + str(admins[i]) + ')')
+				if 'description' in response :
+					print('reason: ' + response['description'])
 	else :
 		request = 'https://api.telegram.org/bot' + token + '/sendMessage'
 		for i in range(len(admins)):
