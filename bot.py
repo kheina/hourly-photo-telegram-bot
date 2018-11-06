@@ -2,6 +2,8 @@ import requests
 import json
 import sched, time
 import dropbox
+import twitter
+import shutil
 
 #initialize the dropbox folder
 dbx = dropbox.Dropbox('iPVSiTTotuYAAAAAAAEu9Wd6M_ltY0K0amq3pGvEB6NAUAcvVBOUllG4ErHFM8sq')
@@ -24,7 +26,7 @@ scheduler = sched.scheduler(time.time, time.sleep)
 
 #initialize all the lists and variables
 admins = [118819437]	#this is in case the admin download from dropbox fails
-fileIDs = []
+files = []
 usedIDs = []
 forwardList = []
 delay = 180
@@ -35,12 +37,12 @@ sendReport = False
 
 
 def update():
-	print('update()')
+	print()
 	#reinitialize all the lists and variables as global
 	global token
 	global botID
 	global admins
-	global fileIDs
+	global files
 	global usedIDs
 	global forwardList
 	global delay
@@ -54,10 +56,10 @@ def update():
 	admins = dbxadmins[1].json()
 	print(len(admins), 'admins')
 	
-	print('reading fileIDs.json')
-	dbxfileIDs = dbx.files_download('/fileIDs.json')
-	fileIDs = dbxfileIDs[1].json()
-	print(len(fileIDs), 'file ids')
+	print('reading files.json')
+	dbxfiles = dbx.files_download('/files.json')
+	files = dbxfiles[1].json()
+	print(len(files), 'files')
 	
 	print('reading usedIDs.json')
 	dbxusedIDs = dbx.files_download('/usedIDs.json')
@@ -81,7 +83,7 @@ def update():
 
 	print()
 	
-	print("getUpdates")
+	print('getUpdates')
 	request = 'https://api.telegram.org/bot' + token + '/getUpdates'
 	response = requests.get(request)
 	#print(response.url)
@@ -103,38 +105,31 @@ def update():
 			if 'message' in updateList[i] :
 				#print('  chat id:', updateList[i]['message']['chat']['id'])
 				if updateList[i]['message']['chat']['id'] in admins :
-					if 'photo' in updateList[i]['message']:
-						#print('photo ids:', len(updateList[i]['message']['photo']))
-						largestfile = 0
-						largestfileid = 0
-						for j in range(len(updateList[i]['message']['photo'])):
-							if updateList[i]['message']['photo'][j]['file_size'] > largestfile :
-								largestfileid = updateList[i]['message']['photo'][j]['file_id']
-								#print('new largest file:', largestfileid)
-						
-						#print('largest file from update', updateList[i]['update_id'], ':', largestfileid)
-						if largestfileid in fileIDs :
-							print('fileIDs already contains this photo')
+					if 'document' in updateList[i]['message']:
+						print(json.dumps(updateList[i]['message']['document'], indent=2, sort_keys=True))
+						if updateList[i]['message']['document'] in files :
+							print('files already contains this photo')
 						else:
-							fileIDs.append(largestfileid)
-							print('file_id added', end=' ') 
+							files.append(updateList[i]['message']['document'])
+							print('file added', end=' ') 
 							if 'from' in updateList[i]['message'] :
 								if 'username' in updateList[i]['message']['from'] :
 									print('(from ', updateList[i]['message']['from']['username'], ')', sep='')
 								else :
 									print('(from ', updateList[i]['message']['from']['first_name'], ' (', updateList[i]['message']['from']['id'], '))', sep='')
 							else :
-								print('')
+								print()
 					else :
-						#MESSAGE DOESN'T CONTAIN A PICTURE, PUT PARSE CODE HERE
-						print('message does not contain a picture', end=' ') 
+						#MESSAGE DOESN'T CONTAIN A FILE, PUT PARSE CODE HERE
+						print('message does not contain a file', end=' ')
+						#print(json.dumps(updateList[i], indent=2, sort_keys=True))
 						if 'from' in updateList[i]['message'] :
 							if 'username' in updateList[i]['message']['from'] :
 								print('(from ', updateList[i]['message']['from']['username'], ')', sep='')
 							else :
 								print('(from ', updateList[i]['message']['from']['first_name'], ' (', updateList[i]['message']['from']['id'], '))', sep='')
 						else :
-							print('')
+							print()
 				else :
 					print('update not from admin', end=' ')
 					if    'new_chat_member' in updateList[i]['message'] :
@@ -157,7 +152,7 @@ def update():
 							else :
 								print('(from ', updateList[i]['message']['from']['first_name'], ' (', updateList[i]['message']['from']['id'], '))', sep='')
 						else :
-							print('')
+							print()
 						print('   ', updateList[i]['message'])
 			else :
 				print('update not does not contain message')
@@ -186,7 +181,7 @@ def update():
 
 
 def report_forwards() :
-	print('report_forwards()')
+	print()
 	global token
 	global forwardList
 	global report
@@ -223,15 +218,15 @@ def report_forwards() :
 
 
 def update_dropbox() :
-	print('update_dropbox()')
+	print()
 	#reinitialize all the lists and variables as global
-	global fileIDs
+	global files
 	global usedIDs
 	global forwardList
 	global delay
 
-	print('uploading fileIDs.json to Dropbox')
-	dbx.files_upload(json.dumps(fileIDs    ).encode('utf-8'), '/fileIDs.json',       dropbox.files.WriteMode('overwrite', None))
+	print('uploading files.json to Dropbox')
+	dbx.files_upload(json.dumps(files      ).encode('utf-8'), '/files.json',         dropbox.files.WriteMode('overwrite', None))
 	print('uploading usedIDs.json to Dropbox')
 	dbx.files_upload(json.dumps(usedIDs    ).encode('utf-8'), '/usedIDs.json',       dropbox.files.WriteMode('overwrite', None))
 	print('uploading delay.json to Dropbox')
@@ -243,70 +238,125 @@ def update_dropbox() :
 
 
 def post_photo():
-	print('post_photo()')
-	#reinitialize all the lists and variables as global
+	print()
 	global token
 	global channel
-	global fileIDs
+	global files
 	global usedIDs
 	global forwardList
 	global report
 	global sendReport	
 	removeList = []
 	
-	print('sending photo to chat_id:', channel, '...', sep='')
-	if len(fileIDs) > 0 :
-		phototosend = fileIDs.pop(0)
+	if len(files) > 0 :
+		fileToSend = files.pop(0)
+		filename = 'image'
+		link = None
+		request = 'https://api.telegram.org/bot' + token + '/getFile?file_id=' + fileToSend['file_id']
+		#print(request)
+		response = requests.get(request)
+		response = response.json()
+		if response['ok'] :
+			if 'image' in fileToSend['mime_type'] :
+				filename = filename + '.' + fileToSend['mime_type'][6:] # cuts off the first 6 characters ('image/')
+			print('downloading...', end='')
+			request = 'https://api.telegram.org/file/bot' + token + '/' + response['result']['file_path']
+			response = requests.get(request, stream=True) # stream=True IS REQUIRED
+			print('done.', end='')
+			if response.status_code == 200:
+				with open(filename, 'wb') as image:
+					shutil.copyfileobj(response.raw, image)
+			print(' saved as ' + filename)
+			link = get_flickr_link(fileToSend['file_name'])
+		else :
+			print('response not ok')
+			files.append(fileToSend)
+			report = report + '`post failed.`\n`photo re-added to queue.`'
+			return # we don't have an image, so just return
+
+
+		snep = open(filename, 'rb')
+
+		# send to telegram
+		print('sending photo to telegram, chat_id:' + str(channel) + '...', end='')
 		request = 'https://api.telegram.org/bot' + token + '/sendPhoto'
-		sentPhoto = requests.get(request + '?chat_id=' + str(channel) + '&photo=' + phototosend)
+		telegramfile = {'photo': snep}
+		if link is not None :
+			sentPhoto = requests.get(request + '?chat_id=' + str(channel) + '&caption=' + link.replace('&', '%26'), files=telegramfile)
+		else :
+			sentPhoto = requests.get(request + '?chat_id=' + str(channel), files=telegramfile)
 		if sentPhoto.json()['ok'] :
 			sentPhoto = sentPhoto.json()
-			if len(fileIDs) < 10 :
-				report = report + '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'])
+			if len(files) < 10 :
+				report = report + '`telegram...success.`'
 			else :
-				report = report + '`photo sent successfully.`\n` channel post: `' + str(sentPhoto['result']['message_id'])
-			usedIDs.append(phototosend)
+				report = report + '`telegram...success.`'
+			usedIDs.append(sentPhoto['result']['photo'][-1]['file_id'])
+			#print('sentPhoto:' + str(sentPhoto['result']['photo'][-1]['file_id']))
 			print('success.')
 			
 			#FORWARDING PHOTO
-			print('forwarding photo to', len(forwardList), 'chats')
+			print('forwarding photo to', len(forwardList), 'chats...', end='')
 			successfulForwards = 0
 			request = 'https://api.telegram.org/bot' + token + '/forwardMessage'
 			for i in range(len(forwardList)) :
 				response = requests.get(request + '?chat_id=' + str(forwardList[i]) + '&from_chat_id=' + str(channel) + '&message_id=' + str(sentPhoto['result']['message_id']))
 				if response.json()['ok'] :
 					successfulForwards = successfulForwards + 1
-					print('forward[' + str(i) + '] ok')
+					#print('forward[' + str(i) + '] ok')
 				else :
 					getchat = requests.get('https://api.telegram.org/bot' + token + '/getChat?chat_id=' + str(forwardList[i]))
 					getchat = getchat.json()
 					if getchat['ok'] :
-						print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat['result']['title'])
+						print('\nforward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat['result']['title'], end='')
 						report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`) ` ' + getchat['result']['title']
 					else :
 						if 'description' in getchat :
-							print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat['description'])
+							print('\nforward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat['description'], end='')
 							report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`) `' + getchat['description']
 							if 'Forbidden' in getchat['description'] :
 								removeList.append(forwardList[i])
 								report = report + '\n` removed `' + str(forwardList[i]) + '` from forward list`'
 						else :
-							print('forward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ')')
+							print('\nforward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ')', end='')
 							report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`)'
 					if 'description' in response.json() :
 						report = report + ' reason: `' + response.json()['description']
 					else :
 						report = report + '`'
-					print('raw response:', response.json())
-					print('raw command:', response.url)
+					print('\nraw response:', response.json(), end='')
+					print('\nraw command:', response.url, end='')
 					sendReport = True
 			report = report + '\n` forwarded to: `' + str(successfulForwards) + '` chats`'
+			print('done. ')
 		else :
 			print('sentPhoto not ok, skipping forwards')
-			fileIDs.append(phototosend)
+			print(sentPhoto.json())
+			files.append(fileToSend)
 			report = report + '`post failed.`\n`photo re-added to queue.`'
 			print('failed.')
 			sendReport = True
+
+		# send to twitter
+		print('sending photo to twitter...', end='')
+		api = twitter.Api(consumer_key = '44CKZw0x6EeajnfyXvBdP93Vw', consumer_secret = 'bAwiBQ9GmBTKp4gChe7vDp4U8vuvwm5uw4crdA7EVoQA490C6i', access_token_key = '1039699928723976192-x4IZMRlwSNg2qw6IGcgM2vr5SgxFlD', access_token_secret = 'eK7wav6NBuaRiaiBWFZprerBHEbmypUPAhiTHqqPZ5vhE')
+		try:
+			if link is not None :
+				status = api.PostUpdate(status=link, media=[snep,])
+			else :
+				status = api.PostUpdate(status='', media=[snep,])
+			print('success.')
+		except UnicodeDecodeError:
+			print('Your message could not be encoded.  Perhaps it contains non-ASCII characters?')
+			print('Try explicitly specifying the encoding with the --encoding flag')
+		except :
+			report = report + '`twitter...failed.`'
+			sendReport = True
+			print('failed.')
+
+
+
+		
 	else :
 		report = report + '`post failed.`\n`no photos in queue.`\nADD PHOTOS IMMEDIATELY'
 		sendReport = True
@@ -317,9 +367,9 @@ def post_photo():
 
 
 def schedule_nextupdate():
-	print('schedule_nextupdate()')
+	print()
 	#reinitialize all the lists and variables as global
-	global fileIDs
+	global files
 	global delay
 	global timezone
 	global report
@@ -341,8 +391,8 @@ def schedule_nextupdate():
 	if time.localtime(nextupdate).tm_min  < 10 : nexttime = nexttime + '0'
 	nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
 
-	report = report + '\n`current delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(fileIDs)) + '`\n current time: `' + noowtime + '`\n  next update: `' + nexttime
-	if len(fileIDs) < 10 :
+	report = report + '\n`current delay: `' + str(delay) + '` minutes\ncurrent queue: `' + str(len(files)) + '`\n current time: `' + noowtime + '`\n  next update: `' + nexttime
+	if len(files) < 10 :
 		report = report + '\nLOW ON PHOTOS'
 		sendReport = True
 	#report = report + '\n`next photo in queue: `'
@@ -357,9 +407,9 @@ def schedule_nextupdate():
 
 
 def schedule_firstupdate():
-	print('schedule_firstupdate()')
+	print()
 	#reinitialize all the lists and variables as global
-	global fileIDs
+	global files
 	global delay
 	global timezone
 	global forwardList
@@ -381,26 +431,47 @@ def schedule_firstupdate():
 	if time.localtime(nextupdate).tm_min  < 10 : nexttime = nexttime + '0'
 	nexttime = nexttime + str(time.localtime(nextupdate).tm_min)
 	
-	report = report + '`  bot started`\n`current delay: `' + str(delay) + '` minutes`\n`current queue: `' + str(len(fileIDs)) + '\n`     forwards: `' + str(len(forwardList)) + '\n` current time: `' + noowtime + '\n`  next update: `' + nexttime
+	report = report + '`  bot started`\n`current delay: `' + str(delay) + '` minutes`\n`current queue: `' + str(len(files)) + '\n`     forwards: `' + str(len(forwardList)) + '\n` current time: `' + noowtime + '\n`  next update: `' + nexttime
 	#report = report + '\n`next photo in queue: `'
-		
+			
 	print('current time:', noowtime)
 	print(' next update:', nexttime)
 	print('bot started. scheduling first post...')
 	print('scheduling update for', nexttime)
+	#post_photo()
 	scheduler.enterabs((nextupdate - ((60*60) * timezone)), 1, scheduled_post, ())
 
 
 
+def get_flickr_link(filename):
+	#return https://www.flickr.com/photo.gne?rb=1&id= /id/
+	strings = filename.split('_')
+	for i in range(len(strings)) :
+		if IsInt(strings[i]) :
+			return 'https://www.flickr.com/photo.gne?rb=1&id=' + strings[i]
+	return None
+
+
+
+# https://stackoverflow.com/a/1267145/8197207
+def IsInt(s):
+    try: 
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+
+
 def send_report():
-	print('send_report()')
+	print()
 	#reinitialize all the lists and variables as global
 	global token
 	global admins
-	global fileIDs
+	global files
 	global report
 	
-	if len(fileIDs) > 0 :
+	if len(files) > 0 :
 		request = 'https://api.telegram.org/bot' + token + '/sendMessage'
 		for i in range(len(admins)):
 			response = requests.get(request + '?chat_id=' + str(admins[i]) + '&text=' + report + '&parse_mode=Markdown')
@@ -426,7 +497,7 @@ def initial_startup():
 	#reinitialize all the lists and variables as global
 	global scheduler
 	
-	#report_forwards()
+	report_forwards()
 	update()
 	update_dropbox()
 	schedule_firstupdate()
@@ -437,7 +508,7 @@ def initial_startup():
 
 
 def scheduled_post():
-	print('scheduled_post()')
+	print()
 	#reinitialize all the lists and variables as global
 	global scheduler
 	global sendReport	

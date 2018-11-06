@@ -7,7 +7,7 @@ import random
 
 def cls():
 	os.system('cls' if os.name=='nt' else 'clear')
-	print('(c) 2017 Snep Corporation. All rights reserved.\n')
+	print('(c) 2018 Snep Corporation. All rights reserved.\n')
 
 #initialize the dropbox folder
 dbx = dropbox.Dropbox('iPVSiTTotuYAAAAAAAEu9Wd6M_ltY0K0amq3pGvEB6NAUAcvVBOUllG4ErHFM8sq')
@@ -31,7 +31,7 @@ lastUpdateID = 000
 rand = random.seed()
 
 command = ''
-commandList = ['>refresh CLI', 'getMe', 'getChat', 'getChatAdministrators', 'getUpdates', 'sendMessage', 'sendPhoto']
+commandList = ['>refresh CLI', 'getMe', 'getChat', 'getChatAdministrators', 'getUpdates', 'sendMessage', 'sendPhoto', 'messageAll', 'photoAll']
 optionalCommandsList = {}
 optionalCommandsList['getChat'] = ['>send request', 'chat_id']
 optionalCommandsList['getChatAdministrators'] = ['>send request', 'chat_id']
@@ -41,6 +41,8 @@ optionalCommandsList['sendPhoto']   = ['>send request', 'chat_id', 'photo', 'cap
 optionalCommandsList['parse_mode'] = ['Markdown', 'HTML']
 optionalCommandsList['disable_web_page_preview'] = ['true', 'false']
 optionalCommandsList['disable_notification'] = ['true', 'false']
+optionalCommandsList['messageAll'] = ['>send request', 'text', 'parse_mode', 'disable_web_page_preview', 'disable_notification']
+optionalCommandsList['photoAll']   = ['>send request', 'photo', 'caption']
 
 
 
@@ -127,17 +129,53 @@ def parse_request() :
 	#print('parse_request()')
 	global command
 	global lastUpdateID
+	global forwardList
 
 	print()
 	areyousure = request = ''
 	areyousure = input('Are you sure? Y/n>')
 	if areyousure == 'y' or areyousure == '' :
-		response = requests.get(command)
-		response = response.json()
-		if '/getUpdates' in command and response['ok'] and len(response['result']) > 0:
-			lastUpdateID = response['result'][len(response['result']) - 1]['update_id']
-		print('\nresponse:')
-		print_json_formatted(response)
+		if '/messageAll' in command :
+			for i in range(len(forwardList)):
+				print('sending to forward[' + str(i) + '](' + str(forwardList[i]) + ')...', end='')
+				response = requests.get(command.replace('/messageAll?', '/sendMessage?chat_id=' + str(forwardList[i]) + '&'))
+				#response = response.json()
+				#response = {}
+				#response['ok'] = True
+				if response.json()['ok'] :
+					print('success.\n', end='')
+				else :
+					print('failed (' + response.json()['description'] + ')(' + response.url + '), retrying...', end='')
+					response = requests.get(command.replace('/messageAll?', '/sendMessage?chat_id=' + str(forwardList[i]) + '&'))
+					response = response.json()
+					if response['ok'] :
+						print('success.\n', end='')
+					else :
+						print('failed.\n', end='')
+		elif '/photoAll' in command :
+			for i in range(len(forwardList)):
+				print('sending to forward[' + str(i) + '](' + str(forwardList[i]) + ')...', end='')
+				response = requests.get(command.replace('/photoAll?', '/sendPhoto?chat_id=' + str(forwardList[i]) + '&'))
+				#response = response.json()
+				#response = {}
+				#response['ok'] = True
+				if response.json()['ok'] :
+					print('success.\n', end='')
+				else :
+					print('failed (' + response.json()['description'] + ')(' + response.url + '), retrying...', end='')
+					response = requests.get(command.replace('/photoAll?', '/sendPhoto?chat_id=' + str(forwardList[i]) + '&'))
+					response = response.json()
+					if response['ok'] :
+						print('success.\n', end='')
+					else :
+						print('failed.\n', end='')
+		else :
+			response = requests.get(command)
+			response = response.json()
+			if '/getUpdates' in command and response['ok'] and len(response['result']) > 0:
+				lastUpdateID = response['result'][len(response['result']) - 1]['update_id']
+			print('\nresponse:')
+			print_json_formatted(response)
 	print('done.')
 #
 
@@ -158,6 +196,7 @@ def take_input() :
 	#print(command)
 	if parse_command() :
 		command = 'https://api.telegram.org/bot' + token + '/' + command
+		print()
 		print(command)
 		parse_request()
 #
@@ -207,7 +246,7 @@ def parse_command() :
 				for i in range(len(forwardList)):
 					print('forward[', str(i+1),']: ', forwardInfoList[i], sep='')
 			elif optionalCommand == '>clear updates' :
-				command = tempCommand = tempCommand + '?&offset=' + str(lastUpdateID + 1)
+				command = tempCommand = tempCommand + '?offset=' + str(lastUpdateID + 1)
 				return True
 			#end nonstandard commands					##########
 			if optionalCommand in optionalCommandsList :
@@ -215,13 +254,20 @@ def parse_command() :
 				for i in range(len(optionalCommandsList[optionalCommand])) :
 					print('[' + str(i) + ']' + optionalCommandsList[optionalCommand][i])
 				print('\nenter your command below or enter a number from the list.')
-				optionalCommandValue = input(tempCommand + '&' + optionalCommand + '>')
+				if '?' in tempCommand :
+					optionalCommandValue = input(tempCommand + '&' + optionalCommand + '>')
+				else :
+					optionalCommandValue = input(tempCommand + '?' + optionalCommand + '>')
+				
 				if optionalCommandValue == '' and len(optionalCommandsList[optionalCommand]) > 0 :
 					optionalCommandValue = optionalCommandsList[optionalCommand][0]
 				elif optionalCommandValue.isdigit() and int(optionalCommandValue) < len(optionalCommandsList[optionalCommand]) :
 					optionalCommandValue = optionalCommandsList[optionalCommand][int(optionalCommandValue)]
 			else :
-				optionalCommandValue = input(tempCommand + '&' + optionalCommand + '>')
+				if '?' in tempCommand :
+					optionalCommandValue = input(tempCommand + '&' + optionalCommand + '>')
+				else :
+					optionalCommandValue = input(tempCommand + '?' + optionalCommand + '>')
 			
 			#PUT NONSTANDARD COMMAND LISTS HERE!		##########
 			if optionalCommandValue == 'random' :
@@ -272,7 +318,7 @@ def print_json_formatted(jsonToPrint) :
 	#	#	print(indent)
 	#	else :
 	#		print(c, end='')
-	print(json.dumps(jsonToPrint, indent=4, sort_keys=True))
+	print(json.dumps(jsonToPrint, indent=2, sort_keys=True))
 	print()
 #
 
