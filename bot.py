@@ -339,7 +339,7 @@ def post_photo():
 
 		# send to twitter
 		print('sending photo to twitter...', end='')
-		api = twitter.Api(consumer_key = '44CKZw0x6EeajnfyXvBdP93Vw', consumer_secret = 'bAwiBQ9GmBTKp4gChe7vDp4U8vuvwm5uw4crdA7EVoQA490C6i', access_token_key = '1039699928723976192-x4IZMRlwSNg2qw6IGcgM2vr5SgxFlD', access_token_secret = 'eK7wav6NBuaRiaiBWFZprerBHEbmypUPAhiTHqqPZ5vhE')
+		api = twitter.Api(consumer_key = 'tiBb32rvkc6qLYFdxI7CBWPR8', consumer_secret = 'eoiZ2PAxkVScI1xrXs6gNWmPGaYJ2YGzM5i5dhWiK6tyo5PgH3', access_token_key = '1039699928723976192-Gh7e07jIfiul6wWSHXWRNX998PQB2i', access_token_secret = 'GqsDafACFRPKoX5Jn6P7FgppBrN1Dw5egM0zvJq1OD1G0')
 		try:
 			if link is not None :
 				status = api.PostUpdate(status=link, media=[snep,])
