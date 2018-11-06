@@ -6,11 +6,11 @@ import twitter
 import shutil
 
 #initialize the dropbox folder
-dbx = dropbox.Dropbox('iPVSiTTotuYAAAAAAAEu9Wd6M_ltY0K0amq3pGvEB6NAUAcvVBOUllG4ErHFM8sq')
+dbx = dropbox.Dropbox('iPVSiTTotuYAAAAAAAEvRzXPXW5m09Z3uGWw1bvHSLFnpLfTgENQKTT6u_kcsqtt')
 #enter your dropbox access token in the ('') above
 
 #telegram bot auth token (given by @BotFather upon your bot's creation)
-token = '394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c'
+token = '394580059:AAHoXGKzMmL2MPjVZ8cm15rnUKmdrHA3XOs'
 #enter your telegram bot's auth token in the '' above
 
 #the chat_id of the channel where all the pictures will be posted
