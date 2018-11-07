@@ -10,12 +10,16 @@ def cls():
 	print('(c) 2018 Snep Corporation. All rights reserved.\n')
 
 #initialize the dropbox folder
-dbx = dropbox.Dropbox('iPVSiTTotuYAAAAAAAEu9Wd6M_ltY0K0amq3pGvEB6NAUAcvVBOUllG4ErHFM8sq')
+dbx = dropbox.Dropbox('iPVSiTTotuYAAAAAAAEvRzXPXW5m09Z3uGWw1bvHSLFnpLfTgENQKTT6u_kcsqtt')
 #enter your dropbox access token in the ('') above
 
 #telegram bot auth token (given by @BotFather upon your bot's creation)
-token = '394580059:AAEw7Mo_xDNiyp_O6Zyw9gU_P4DMM8dyz6c'
+token = '394580059:AAHoXGKzMmL2MPjVZ8cm15rnUKmdrHA3XOs'
 #enter your telegram bot's auth token in the '' above
+
+#the chat_id of the channel where all the pictures will be posted
+channel = -1001084745741
+#enter your telegram channel's chat_id after the = above
 
 #the id of the bot itself
 botID = 394580059
@@ -31,7 +35,7 @@ lastUpdateID = 000
 rand = random.seed()
 
 command = ''
-commandList = ['>refresh CLI', 'getMe', 'getChat', 'getChatAdministrators', 'getUpdates', 'sendMessage', 'sendPhoto', 'messageAll', 'photoAll']
+commandList = ['>refresh CLI', 'getMe', 'getChat', 'getChatAdministrators', 'getUpdates', 'sendMessage', 'sendPhoto', 'messageAll', 'photoAll', 'forwardAll']
 optionalCommandsList = {}
 optionalCommandsList['getChat'] = ['>send request', 'chat_id']
 optionalCommandsList['getChatAdministrators'] = ['>send request', 'chat_id']
@@ -43,6 +47,7 @@ optionalCommandsList['disable_web_page_preview'] = ['true', 'false']
 optionalCommandsList['disable_notification'] = ['true', 'false']
 optionalCommandsList['messageAll'] = ['>send request', 'text', 'parse_mode', 'disable_web_page_preview', 'disable_notification']
 optionalCommandsList['photoAll']   = ['>send request', 'photo', 'caption']
+optionalCommandsList['forwardAll'] = ['>send request', 'message_id']
 
 
 
@@ -164,6 +169,21 @@ def parse_request() :
 				else :
 					print('failed (' + response.json()['description'] + ')(' + response.url + '), retrying...', end='')
 					response = requests.get(command.replace('/photoAll?', '/sendPhoto?chat_id=' + str(forwardList[i]) + '&'))
+					response = response.json()
+					if response['ok'] :
+						print('success.\n', end='')
+					else :
+						print('failed.\n', end='')
+		elif '/forwardAll' in command :
+			command = command.replace('/forwardAll?', '/forwardMessage?from_chat_id=' + str(channel) + '&')
+			for i in range(len(forwardList)):
+				print('sending to forward[' + str(i) + '](' + str(forwardList[i]) + ')...', end='')
+				response = requests.get(command + '&chat_id=' + str(forwardList[i]))
+				if response.json()['ok'] :
+					print('success.\n', end='')
+				else :
+					print('failed (' + response.json()['description'] + ')(' + response.url + '), retrying...', end='')
+					response = requests.get(command + '&chat_id=' + str(forwardList[i]))
 					response = response.json()
 					if response['ok'] :
 						print('success.\n', end='')
