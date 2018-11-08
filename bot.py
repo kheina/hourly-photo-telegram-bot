@@ -42,6 +42,7 @@ with open('credentials.json') as userinfo :
 	channel = credentials['telegramChannel']
 	botID = credentials['telegramBotID']
 	api = twitter.Api(consumer_key = credentials['twitter']['consumerKey'], consumer_secret = credentials['twitter']['consumerSecret'], access_token_key = credentials['twitter']['accessTokenKey'], access_token_secret = credentials['twitter']['accessTokenSecret'])
+	print(json.dumps(credentials, indent=2))
 print('..success.')
 
 #initialize the scheduler
