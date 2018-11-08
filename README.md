@@ -11,7 +11,7 @@ twitter if it is either a photo or video.
 ## Usage
 Start by cloning the repo into your desired folder.
 
-Take the admins.json, delay.json, fileIDs.json, forwardList.json, timeZone.json, and usedIDs.json
+Take the admins.json, delay.json, files.json, forwardList.json, timeZone.json, and usedIDs.json
 and move them into the app folder made by dropbox (create one of these on dropbox.com). Once you
 have done this, edit the first few lines of bot.py and change dbx, token, channel, and botID to
 your own information.

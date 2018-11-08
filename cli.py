@@ -3,30 +3,59 @@ import json
 import sched, time
 import dropbox
 import os
+import sys
 import random
+import shutil
 
 def cls():
 	os.system('cls' if os.name=='nt' else 'clear')
 	print('(c) 2018 Snep Corporation. All rights reserved.\n')
 
-#initialize the dropbox folder
-dbx = dropbox.Dropbox('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-#enter your dropbox access token in the ('') above
 
-#telegram bot auth token (given by @BotFather upon your bot's creation)
-token = 'yyyyyyyyy:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-#enter your telegram bot's auth token in the '' above
+# credentials = {
+# 	'dropboxAccessToken' : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+# 	'telegramAccessToken' : 'yyyyyyyyy:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+# 	'telegramChannel' : -yyyyyyyyyyyyy,
+# 	'telegramBotID' : yyyyyyyyy,
+# 	'twitter' : {
+# 		'consumerKey' : 'xxxxxxxxxxxxxxxxxxxxxxxxx',
+# 		'consumerSecret' : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+# 		'accessTokenKey' : 'yyyyyyyyyyyyyyyyyyy-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+# 		'accessTokenSecret' : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+# 	}
+# }
+# credentials are now saved in credentials.json in the format above
 
-#the chat_id of the channel where all the pictures will be posted
-channel = -yyyyyyyyyyyyy
-#enter your telegram channel's chat_id after the = above
+# initialize the dropbox folder
+dbx = ''
+# enter your dropbox access token in the ('') above
 
-#the id of the bot itself
-botID = yyyyyyyyy
-#enter your telegram bot's id after the = above
+# telegram bot auth token (given by @BotFather upon your bot's creation)
+token = ''
+# enter your telegram bot's auth token in the '' above
 
-#initialize all the lists and variables
-fileIDs = []
+# the chat_id of the channel where all the pictures will be posted
+channel = 0
+# enter your telegram channel's chat_id after the = above
+
+# the id of the bot itself
+botID = 0
+# enter your telegram bot's id after the = above
+
+# initialize twitter
+api = ''
+
+print('loading credentials.', end='')
+with open('credentials.json') as userinfo :
+	credentials = json.load(userinfo)
+	dbx = dropbox.Dropbox(credentials['dropboxAccessToken'])
+	token = credentials['telegramAccessToken']
+	channel = credentials['telegramChannel']
+	botID = credentials['telegramBotID']
+print('..success.')
+
+# initialize all the lists and variables
+files = []
 usedIDs = []
 forwardList = []
 forwardInfoList = []
@@ -35,7 +64,7 @@ lastUpdateID = 000
 rand = random.seed()
 
 command = ''
-commandList = ['>refresh CLI', 'getMe', 'getChat', 'getChatAdministrators', 'getUpdates', 'sendMessage', 'sendPhoto', 'messageAll', 'photoAll', 'forwardAll']
+commandList = ['>refresh CLI', 'getMe', 'getChat', 'getChatAdministrators', 'getUpdates', 'sendMessage', 'sendPhoto', 'messageAll', 'photoAll', 'forwardAll', 'getFile']
 optionalCommandsList = {}
 optionalCommandsList['getChat'] = ['>send request', 'chat_id']
 optionalCommandsList['getChatAdministrators'] = ['>send request', 'chat_id']
@@ -48,7 +77,9 @@ optionalCommandsList['disable_notification'] = ['true', 'false']
 optionalCommandsList['messageAll'] = ['>send request', 'text', 'parse_mode', 'disable_web_page_preview', 'disable_notification']
 optionalCommandsList['photoAll']   = ['>send request', 'photo', 'caption']
 optionalCommandsList['forwardAll'] = ['>send request', 'message_id']
+optionalCommandsList['getFile'] = ['>send request', 'file_id']
 
+fileToDownload = {}
 
 
 
@@ -69,15 +100,15 @@ def startup() :
 	#reinitialize all the lists and variables as global
 	global token
 	global botID
-	global fileIDs
+	global files
 	global usedIDs
 	global forwardList
 	global newForwardList
 	
-	print('downloading fileIDs.json')
-	dbxfileIDs = dbx.files_download('/fileIDs.json')
-	fileIDs = dbxfileIDs[1].json()
-	print(len(fileIDs), 'file ids')
+	print('downloading files.json')
+	dbxfiles = dbx.files_download('/files.json')
+	files = dbxfiles[1].json()
+	print(len(files), 'files')
 	
 	print('downloading usedIDs.json')
 	dbxusedIDs = dbx.files_download('/usedIDs.json')
@@ -87,6 +118,9 @@ def startup() :
 	optionalCommandsList['photo'] = usedIDs
 	optionalCommandsList['photo'].insert(0, 'random')
 	optionalCommandsList['photo'].append('random')
+	optionalCommandsList['file_id'] = []
+	for i in range(len(files)) :
+		optionalCommandsList['file_id'].append(files[i]['file_id'])
 	report_forwards()
 	print()
 #
@@ -135,6 +169,7 @@ def parse_request() :
 	global command
 	global lastUpdateID
 	global forwardList
+	global fileToDownload
 
 	print()
 	areyousure = request = ''
@@ -189,6 +224,19 @@ def parse_request() :
 						print('success.\n', end='')
 					else :
 						print('failed.\n', end='')
+		elif '/getFile' in command :
+			response = requests.get(command)
+			response = response.json()
+			if response['ok'] :
+				print('response: ok')
+				print('downloading...', end='')
+				request = 'https://api.telegram.org/file/bot' + token + '/' + response['result']['file_path']
+				response = requests.get(request, stream=True) # stream=True IS REQUIRED
+				filename = fileToDownload['file_name']
+				if response.status_code == 200:
+					with open(filename, 'wb') as image:
+						shutil.copyfileobj(response.raw, image)
+				print(' saved as ' + filename)
 		else :
 			response = requests.get(command)
 			response = response.json()
@@ -204,7 +252,6 @@ def parse_request() :
 
 
 def take_input() :
-	#print('take_input()')
 	global command
 	command = ''
 	
@@ -213,13 +260,25 @@ def take_input() :
 		print('[' + str(i) + ']' + commandList[i])
 	print('\nenter your command below or enter a number from the list.\nall requests will be formatted like so:\n    https://api.telegram.org/bot <token> /COMMAND')
 	command = input('>')
-	#print(command)
+	if IsInt(command) and int(command) < 0 :
+		sys.exit()
 	if parse_command() :
 		command = 'https://api.telegram.org/bot' + token + '/' + command
 		print()
 		print(command)
 		parse_request()
-#
+
+
+
+
+
+# https://stackoverflow.com/a/1267145/8197207
+def IsInt(s):
+    try: 
+        int(s)
+        return True
+    except ValueError:
+        return False
 
 
 
@@ -230,6 +289,7 @@ def parse_command() :
 	global command
 	global commandList
 	global lastUpdateID
+	global fileToDownload
 	
 	tempCommand = command
 	
@@ -265,6 +325,10 @@ def parse_command() :
 				print()
 				for i in range(len(forwardList)):
 					print('forward[', str(i+1),']: ', forwardInfoList[i], sep='')
+			elif optionalCommand == 'file_id' :
+				print()
+				for i in range(len(files)) :
+					print('files[', str(i),']: ', files[i]['file_name'], sep='')
 			elif optionalCommand == '>clear updates' :
 				command = tempCommand = tempCommand + '?offset=' + str(lastUpdateID + 1)
 				return True
@@ -281,6 +345,9 @@ def parse_command() :
 				
 				if optionalCommandValue == '' and len(optionalCommandsList[optionalCommand]) > 0 :
 					optionalCommandValue = optionalCommandsList[optionalCommand][0]
+				elif optionalCommand == 'file_id' and optionalCommandValue.isdigit() and int(optionalCommandValue) < len(files) :
+					fileToDownload = files[int(optionalCommandValue)]
+					optionalCommandValue = optionalCommandsList[optionalCommand][int(optionalCommandValue)]
 				elif optionalCommandValue.isdigit() and int(optionalCommandValue) < len(optionalCommandsList[optionalCommand]) :
 					optionalCommandValue = optionalCommandsList[optionalCommand][int(optionalCommandValue)]
 			else :

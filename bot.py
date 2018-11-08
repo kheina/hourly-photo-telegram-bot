@@ -6,30 +6,49 @@ import twitter
 import shutil
 
 # initialize the dropbox folder
-dbx = dropbox.Dropbox('iPVSiTTotuYAAAAAAAEvSsq2q_FZ6W0aT9oxopuI9dRUBbW0V5nA9VIWmIMyn7_t')
-# enter your dropbox access token in the ('') above
+dbx = ''
 
 # telegram bot auth token (given by @BotFather upon your bot's creation)
-token = '394580059:AAHcK1f92OuHDc1b3yTUMSnxB9D435VeBoA'
-# enter your telegram bot's auth token in the '' above
+token = ''
 
 # the chat_id of the channel where all the pictures will be posted
-channel = -1001084745741
-# enter your telegram channel's chat_id after the = above
+channel = 0
 
 # the id of the bot itself
-botID = 394580059
-# enter your telegram bot's id after the = above
+botID = 0
 
 # initialize twitter
-api = twitter.Api(consumer_key = 'tiBb32rvkc6qLYFdxI7CBWPR8', consumer_secret = 'eoiZ2PAxkVScI1xrXs6gNWmPGaYJ2YGzM5i5dhWiK6tyo5PgH3', access_token_key = '1039699928723976192-Gh7e07jIfiul6wWSHXWRNX998PQB2i', access_token_secret = 'GqsDafACFRPKoX5Jn6P7FgppBrN1Dw5egM0zvJq1OD1G0')
+api = ''
 
+# credentials = {
+# 	'dropboxAccessToken' : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+# 	'telegramAccessToken' : 'yyyyyyyyy:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+# 	'telegramChannel' : -yyyyyyyyyyyyy,
+# 	'telegramBotID' : yyyyyyyyy,
+# 	'twitter' : {
+# 		'consumerKey' : 'xxxxxxxxxxxxxxxxxxxxxxxxx',
+# 		'consumerSecret' : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+# 		'accessTokenKey' : 'yyyyyyyyyyyyyyyyyyy-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+# 		'accessTokenSecret' : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+# 	}
+# }
+# credentials are now saved in credentials.json in the format above
 
-# initialize the scheduler
+print('loading credentials.', end='')
+with open('credentials.json') as userinfo :
+	credentials = json.load(userinfo)
+	dbx = dropbox.Dropbox(credentials['dropboxAccessToken'])
+	token = credentials['telegramAccessToken']
+	channel = credentials['telegramChannel']
+	botID = credentials['telegramBotID']
+	api = twitter.Api(consumer_key = credentials['twitter']['consumerKey'], consumer_secret = credentials['twitter']['consumerSecret'], access_token_key = credentials['twitter']['accessTokenKey'], access_token_secret = credentials['twitter']['accessTokenSecret'])
+print('..success.')
+
+#initialize the scheduler
 scheduler = sched.scheduler(time.time, time.sleep)
 
-# initialize all the lists and variables
-admins = [118819437]	# this is in case the admin download from dropbox fails
+#initialize all the lists and variables
+admins = []
 files = []
 usedIDs = []
 forwardList = []
@@ -42,7 +61,7 @@ sendReport = False
 
 def update():
 	print()
-	# reinitialize all the lists and variables as global
+	#reinitialize all the lists and variables as global
 	global token
 	global botID
 	global admins
@@ -124,7 +143,7 @@ def update():
 							else :
 								print()
 					else :
-						# MESSAGE DOESN'T CONTAIN A FILE, PUT PARSE CODE HERE
+						#MESSAGE DOESN'T CONTAIN A FILE, PUT PARSE CODE HERE
 						print('message does not contain a file', end=' ')
 						#print(json.dumps(updateList[i], indent=2, sort_keys=True))
 						if 'from' in updateList[i]['message'] :
@@ -223,6 +242,7 @@ def report_forwards() :
 
 def update_dropbox() :
 	print()
+	#reinitialize all the lists and variables as global
 	global files
 	global usedIDs
 	global forwardList
@@ -272,7 +292,9 @@ def post_photo():
 				filename = filename + '.' + mime_type[1] # uses anything found after the slash
 				if 'video' not in fileToSend['mime_type'] :
 					postToTwitter = False
-			print("fileToSend['mime_type']:" + fileToSend['mime_type'])
+				elif fileToSend['file_size'] >= 5242880 # 5MB in bytes
+					postToTwitter = False
+			#print("fileToSend['mime_type']:" + fileToSend['mime_type'])
 			print('downloading...', end='')
 			request = 'https://api.telegram.org/file/bot' + token + '/' + response['result']['file_path']
 			response = requests.get(request, stream=True) # stream=True IS REQUIRED
@@ -285,7 +307,7 @@ def post_photo():
 		else :
 			print('response not ok')
 			report = report + '`post failed.`\n`photo re-added to queue.`'
-			return # we don't have an image, so just return
+			return # we don't have a sendable file, so just return
 
 
 		snep = open(filename, 'rb')
@@ -406,6 +428,7 @@ def post_photo():
 
 def schedule_nextupdate():
 	print()
+	#reinitialize all the lists and variables as global
 	global files
 	global delay
 	global timezone
@@ -445,6 +468,7 @@ def schedule_nextupdate():
 
 def schedule_firstupdate():
 	print()
+	#reinitialize all the lists and variables as global
 	global files
 	global delay
 	global timezone
@@ -480,8 +504,7 @@ def schedule_firstupdate():
 
 
 def get_flickr_link(filename):
-	# returns https://www.flickr.com/photo.gne?rb=1&id= /id/
-	# TODO : think of a better way to check if a filename contains a flickr id
+	#return https://www.flickr.com/photo.gne?rb=1&id= /id/
 	strings = filename.split('_')
 	for i in range(len(strings)) :
 		if IsInt(strings[i]) :
@@ -502,6 +525,7 @@ def IsInt(s):
 
 def send_report():
 	print()
+	#reinitialize all the lists and variables as global
 	global token
 	global admins
 	global files
@@ -530,6 +554,7 @@ def send_report():
 
 def initial_startup():
 	print('initial_startup()')
+	#reinitialize all the lists and variables as global
 	global scheduler
 	
 	report_forwards()
@@ -544,6 +569,7 @@ def initial_startup():
 
 def scheduled_post():
 	print()
+	#reinitialize all the lists and variables as global
 	global scheduler
 	global sendReport	
 	
