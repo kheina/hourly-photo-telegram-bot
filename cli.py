@@ -10,19 +10,19 @@ def cls():
 	print('(c) 2018 Snep Corporation. All rights reserved.\n')
 
 #initialize the dropbox folder
-dbx = dropbox.Dropbox('iPVSiTTotuYAAAAAAAEvRzXPXW5m09Z3uGWw1bvHSLFnpLfTgENQKTT6u_kcsqtt')
+dbx = dropbox.Dropbox('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
 #enter your dropbox access token in the ('') above
 
 #telegram bot auth token (given by @BotFather upon your bot's creation)
-token = '394580059:AAHoXGKzMmL2MPjVZ8cm15rnUKmdrHA3XOs'
+token = 'yyyyyyyyy:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 #enter your telegram bot's auth token in the '' above
 
 #the chat_id of the channel where all the pictures will be posted
-channel = -1001084745741
+channel = -yyyyyyyyyyyyy
 #enter your telegram channel's chat_id after the = above
 
 #the id of the bot itself
-botID = 394580059
+botID = yyyyyyyyy
 #enter your telegram bot's id after the = above
 
 #initialize all the lists and variables

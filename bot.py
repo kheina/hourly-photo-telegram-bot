@@ -25,11 +25,11 @@ botID = yyyyyyyyy
 api = twitter.Api(consumer_key = 'xxxxxxxxxxxxxxxxxxxxxxxxx', consumer_secret = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', access_token_key = 'yyyyyyyyyyyyyyyyyyy-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', access_token_secret = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
 
 
-#initialize the scheduler
+# initialize the scheduler
 scheduler = sched.scheduler(time.time, time.sleep)
 
-#initialize all the lists and variables
-admins = [yyyyyyyyy]	#this is in case the admin download from dropbox fails
+# initialize all the lists and variables
+admins = [yyyyyyyyy]	# this is in case the admin download from dropbox fails
 files = []
 usedIDs = []
 forwardList = []
@@ -42,7 +42,7 @@ sendReport = False
 
 def update():
 	print()
-	#reinitialize all the lists and variables as global
+	# reinitialize all the lists and variables as global
 	global token
 	global botID
 	global admins
@@ -124,7 +124,7 @@ def update():
 							else :
 								print()
 					else :
-						#MESSAGE DOESN'T CONTAIN A FILE, PUT PARSE CODE HERE
+						# MESSAGE DOESN'T CONTAIN A FILE, PUT PARSE CODE HERE
 						print('message does not contain a file', end=' ')
 						#print(json.dumps(updateList[i], indent=2, sort_keys=True))
 						if 'from' in updateList[i]['message'] :
@@ -223,7 +223,6 @@ def report_forwards() :
 
 def update_dropbox() :
 	print()
-	#reinitialize all the lists and variables as global
 	global files
 	global usedIDs
 	global forwardList
@@ -407,7 +406,6 @@ def post_photo():
 
 def schedule_nextupdate():
 	print()
-	#reinitialize all the lists and variables as global
 	global files
 	global delay
 	global timezone
@@ -447,7 +445,6 @@ def schedule_nextupdate():
 
 def schedule_firstupdate():
 	print()
-	#reinitialize all the lists and variables as global
 	global files
 	global delay
 	global timezone
@@ -483,7 +480,8 @@ def schedule_firstupdate():
 
 
 def get_flickr_link(filename):
-	#return https://www.flickr.com/photo.gne?rb=1&id= /id/
+	# returns https://www.flickr.com/photo.gne?rb=1&id= /id/
+	# TODO : think of a better way to check if a filename contains a flickr id
 	strings = filename.split('_')
 	for i in range(len(strings)) :
 		if IsInt(strings[i]) :
@@ -504,7 +502,6 @@ def IsInt(s):
 
 def send_report():
 	print()
-	#reinitialize all the lists and variables as global
 	global token
 	global admins
 	global files
@@ -533,7 +530,6 @@ def send_report():
 
 def initial_startup():
 	print('initial_startup()')
-	#reinitialize all the lists and variables as global
 	global scheduler
 	
 	report_forwards()
@@ -548,7 +544,6 @@ def initial_startup():
 
 def scheduled_post():
 	print()
-	#reinitialize all the lists and variables as global
 	global scheduler
 	global sendReport	
 	
