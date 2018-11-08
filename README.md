@@ -2,10 +2,11 @@
 ## About
 This bot was designed and built to control the telegram channel Flickr Sneps https://t.me/flickrsneps
 
-It works by taking the file IDs of photos sent to it by an admin, and keeping them in a queue.
-By default, the delay is set to 60 minutes. Meaning, at the top of every hour, a file ID is popped
-from the queue and sent to the telegram channel specified and forwarded to all the groups the bot
-has been added to.
+It works by storing the file information of files sent to it by an admin, and keeping them in a queue.
+By default, the delay is set to 60 minutes. Meaning, at the top of every hour, a file is downloaded
+from the queue and sent as a photo (if it is actually an image file) to the telegram channel specified
+and forwarded to all the groups the bot has been added to. Afterwards, it will also send the file to
+twitter if it is either a photo or video.
 
 ## Usage
 Start by cloning the repo into your desired folder.

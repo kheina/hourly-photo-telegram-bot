@@ -5,27 +5,31 @@ import dropbox
 import twitter
 import shutil
 
-#initialize the dropbox folder
-dbx = dropbox.Dropbox('iPVSiTTotuYAAAAAAAEvRzXPXW5m09Z3uGWw1bvHSLFnpLfTgENQKTT6u_kcsqtt')
-#enter your dropbox access token in the ('') above
+# initialize the dropbox folder
+dbx = dropbox.Dropbox('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+# enter your dropbox access token in the ('') above
 
-#telegram bot auth token (given by @BotFather upon your bot's creation)
-token = '394580059:AAHoXGKzMmL2MPjVZ8cm15rnUKmdrHA3XOs'
-#enter your telegram bot's auth token in the '' above
+# telegram bot auth token (given by @BotFather upon your bot's creation)
+token = 'yyyyyyyyy:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+# enter your telegram bot's auth token in the '' above
 
-#the chat_id of the channel where all the pictures will be posted
-channel = -1001084745741
-#enter your telegram channel's chat_id after the = above
+# the chat_id of the channel where all the pictures will be posted
+channel = -yyyyyyyyyyyyy
+# enter your telegram channel's chat_id after the = above
 
-#the id of the bot itself
-botID = 394580059
-#enter your telegram bot's id after the = above
+# the id of the bot itself
+botID = yyyyyyyyy
+# enter your telegram bot's id after the = above
+
+# initialize twitter
+api = twitter.Api(consumer_key = 'xxxxxxxxxxxxxxxxxxxxxxxxx', consumer_secret = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', access_token_key = 'yyyyyyyyyyyyyyyyyyy-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', access_token_secret = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+
 
 #initialize the scheduler
 scheduler = sched.scheduler(time.time, time.sleep)
 
 #initialize all the lists and variables
-admins = [118819437]	#this is in case the admin download from dropbox fails
+admins = [yyyyyyyyy]	#this is in case the admin download from dropbox fails
 files = []
 usedIDs = []
 forwardList = []
@@ -245,7 +249,8 @@ def post_photo():
 	global usedIDs
 	global forwardList
 	global report
-	global sendReport	
+	global sendReport
+	global api
 	removeList = []
 	isImage = True
 	forwardMessage = True
@@ -375,7 +380,6 @@ def post_photo():
 		# send to twitter
 		if postToTwitter :
 			print('sending photo to twitter...', end='')
-			api = twitter.Api(consumer_key = 'tiBb32rvkc6qLYFdxI7CBWPR8', consumer_secret = 'eoiZ2PAxkVScI1xrXs6gNWmPGaYJ2YGzM5i5dhWiK6tyo5PgH3', access_token_key = '1039699928723976192-Gh7e07jIfiul6wWSHXWRNX998PQB2i', access_token_secret = 'GqsDafACFRPKoX5Jn6P7FgppBrN1Dw5egM0zvJq1OD1G0')
 			try:
 				if link is not None :
 					status = api.PostUpdate(status=link, media=[snep,])
