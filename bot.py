@@ -292,7 +292,7 @@ def post_photo():
 				filename = filename + '.' + mime_type[1] # uses anything found after the slash
 				if 'video' not in fileToSend['mime_type'] :
 					postToTwitter = False
-				elif fileToSend['file_size'] >= 5242880 # 5MB in bytes
+				elif fileToSend['file_size'] >= 5242880 : # 5MB in bytes
 					postToTwitter = False
 			#print("fileToSend['mime_type']:" + fileToSend['mime_type'])
 			print('downloading...', end='')
