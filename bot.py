@@ -42,7 +42,7 @@ with open('credentials.json') as userinfo :
 	channel = credentials['telegramChannel']
 	botID = credentials['telegramBotID']
 	api = twitter.Api(consumer_key = credentials['twitter']['consumerKey'], consumer_secret = credentials['twitter']['consumerSecret'], access_token_key = credentials['twitter']['accessTokenKey'], access_token_secret = credentials['twitter']['accessTokenSecret'])
-	print(json.dumps(credentials, indent=2))
+	#print(json.dumps(credentials, indent=2))
 print('..success.')
 
 #initialize the scheduler
@@ -319,30 +319,33 @@ def post_photo():
 			request = 'https://api.telegram.org/bot' + token + '/sendPhoto'
 			telegramfile = {'photo': snep}
 			if link is not None :
-				sentPhoto = requests.get(request + '?chat_id=' + str(channel) + '&caption=' + link.replace('&', '%26'), files=telegramfile)
+				sentFile = requests.get(request + '?chat_id=' + str(channel) + '&caption=' + link.replace('&', '%26'), files=telegramfile)
 			else :
-				sentPhoto = requests.get(request + '?chat_id=' + str(channel), files=telegramfile)
-			if sentPhoto.json()['ok'] :
-				sentPhoto = sentPhoto.json()
+				sentFile = requests.get(request + '?chat_id=' + str(channel), files=telegramfile)
+			if sentFile.json()['ok'] :
+				sentFile = sentFile.json()
 				if len(files) <= 10 :
 					report = report + '`telegram...success.`'
 					sendReport = True
 				else :
 					report = report + '`telegram...success.`'
-				usedIDs.append(sentPhoto['result']['photo'][-1]['file_id'])
-				#print('sentPhoto:' + str(sentPhoto['result']['photo'][-1]['file_id']))
+				usedIDs.append(sentFile['result']['photo'][-1]['file_id'])
+				#print('sentFile:' + str(sentFile['result']['photo'][-1]['file_id']))
 				files.pop(0)
 				print('success.')
 			else :
-				print('sentPhoto not ok, skipping forwards')
-				print(sentPhoto.json())
+				print('sentFile not ok, skipping forwards')
+				print(sentFile.json())
 				report = report + '`post failed.`\n`photo re-added to queue.`'
 				print('failed.')
 				sendReport = True
 				forwardMessage = False
 		else :
 			print('sending file to telegram, chat_id:' + str(channel) + '...', end='')
-			request = 'https://api.telegram.org/bot' + token + '/sendDocument?chat_id=' + str(channel) + '&document=' + fileToSend['file_id']
+			if link is not None :
+				request = 'https://api.telegram.org/bot' + token + '/sendDocument?chat_id=' + str(channel) + '&document=' + fileToSend['file_id'] + '&caption=' + link.replace('&', '%26')
+			else :
+				request = 'https://api.telegram.org/bot' + token + '/sendDocument?chat_id=' + str(channel) + '&document=' + fileToSend['file_id']
 			sentFile = requests.get(request)
 			if sentFile.json()['ok'] :
 				sentFile = sentFile.json()
@@ -368,7 +371,7 @@ def post_photo():
 			successfulForwards = 0
 			request = 'https://api.telegram.org/bot' + token + '/forwardMessage'
 			for i in range(len(forwardList)) :
-				response = requests.get(request + '?chat_id=' + str(forwardList[i]) + '&from_chat_id=' + str(channel) + '&message_id=' + str(sentPhoto['result']['message_id']))
+				response = requests.get(request + '?chat_id=' + str(forwardList[i]) + '&from_chat_id=' + str(channel) + '&message_id=' + str(sentFile['result']['message_id']))
 				if response.json()['ok'] :
 					successfulForwards = successfulForwards + 1
 					#print('forward[' + str(i) + '] ok')
@@ -402,19 +405,24 @@ def post_photo():
 		# send to twitter
 		if postToTwitter :
 			print('sending photo to twitter...', end='')
-			try:
+			try :
 				if link is not None :
 					status = api.PostUpdate(status=link, media=[snep,])
 				else :
 					status = api.PostUpdate(status='', media=[snep,])
 				print('success.')
-			except UnicodeDecodeError:
+			except UnicodeDecodeError :
 				print('Your message could not be encoded.  Perhaps it contains non-ASCII characters?')
 				print('Try explicitly specifying the encoding with the --encoding flag')
 			except :
-				report = report + '`twitter...failed.`'
-				sendReport = True
 				print('failed.')
+				try :
+					e = sys.exc_info()[0]
+					print(e)
+				except :
+					print('could not load exception')
+				report = report + '\n`twitter...failed.`'
+				sendReport = True
 
 
 		
