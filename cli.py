@@ -45,7 +45,7 @@ botID = 0
 # initialize twitter
 api = ''
 
-print('loading credentials.', end='')
+print('loading credentials.', end='', flush=True)
 with open('credentials.json') as userinfo :
 	credentials = json.load(userinfo)
 	dbx = dropbox.Dropbox(credentials['dropboxAccessToken'])
@@ -229,7 +229,7 @@ def parse_request() :
 			response = response.json()
 			if response['ok'] :
 				print('response: ok')
-				print('downloading...', end='')
+				print('downloading...')
 				request = 'https://api.telegram.org/file/bot' + token + '/' + response['result']['file_path']
 				response = requests.get(request, stream=True) # stream=True IS REQUIRED
 				filename = fileToDownload['file_name']
@@ -244,6 +244,7 @@ def parse_request() :
 				lastUpdateID = response['result'][len(response['result']) - 1]['update_id']
 			print('\nresponse:')
 			print_json_formatted(response)
+			print('(' + str(len(response['result'])) + ')')
 	print('done.')
 #
 

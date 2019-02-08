@@ -1,5 +1,6 @@
+try : import ujson as json
+except : import json
 import requests
-import json
 import sched, time
 import dropbox
 import twitter
@@ -34,7 +35,7 @@ api = ''
 # }
 # credentials are now saved in credentials.json in the format above
 
-print('loading credentials.', end='')
+print('loading credentials...', end='')
 with open('credentials.json') as userinfo :
 	credentials = json.load(userinfo)
 	dbx = dropbox.Dropbox(credentials['dropboxAccessToken'])
@@ -43,7 +44,7 @@ with open('credentials.json') as userinfo :
 	botID = credentials['telegramBotID']
 	api = twitter.Api(consumer_key = credentials['twitter']['consumerKey'], consumer_secret = credentials['twitter']['consumerSecret'], access_token_key = credentials['twitter']['accessTokenKey'], access_token_secret = credentials['twitter']['accessTokenSecret'])
 	#print(json.dumps(credentials, indent=2))
-print('..success.')
+print('success.')
 
 #initialize the scheduler
 scheduler = sched.scheduler(time.time, time.sleep)
@@ -75,32 +76,32 @@ def update():
 	global sendReport	
 	report = ''
 	
-	print('reading admins.json')
+	print('reading admins.json... ', end='')
 	dbxadmins = dbx.files_download('/admins.json')
 	admins = dbxadmins[1].json()
 	print(len(admins), 'admins')
 	
-	print('reading files.json')
+	print('reading files.json... ', end='')
 	dbxfiles = dbx.files_download('/files.json')
 	files = dbxfiles[1].json()
 	print(len(files), 'files')
 	
-	print('reading usedIDs.json')
+	print('reading usedIDs.json... ', end='')
 	dbxusedIDs = dbx.files_download('/usedIDs.json')
 	usedIDs = dbxusedIDs[1].json()
 	print(len(usedIDs), 'used ids')
 	
-	print('reading forwardList.json')
+	print('reading forwardList.json... ', end='')
 	dbxforward = dbx.files_download('/forwardList.json')
 	forwardList = dbxforward[1].json()
 	print(len(forwardList), 'forwards')
 	
-	print('reading delay.json')
+	print('reading delay.json... ', end='')
 	dbxdelay = dbx.files_download('/delay.json')
 	delay = dbxdelay[1].json()
 	print(delay, 'minute delay')
 
-	print('reading timezone.json')
+	print('reading timezone.json... ', end='')
 	dbxtime = dbx.files_download('/timezone.json')
 	timezone = dbxtime[1].json()
 	print('UTC', timezone)
@@ -156,11 +157,15 @@ def update():
 							print()
 				else :
 					print('update not from admin', end=' ')
-					if    'new_chat_member' in updateList[i]['message'] :
-						if  updateList[i]['message']['new_chat_member']['id'] == botID :
+					if 'new_chat_member' in updateList[i]['message'] :
+						if updateList[i]['message']['new_chat_member']['id'] == botID :
 							forwardList.append(updateList[i]['message']['chat']['id'])
-							print('added ', updateList[i]['message']['chat']['title'], ' (', updateList[i]['message']['chat']['id'], ') to forwardList by ', str(updateList[i]['message']['from']['username']), ' (', updateList[i]['message']['from']['id'], ')', sep='')
-							report = report + '`added `' + str(updateList[i]['message']['chat']['title']) + '` to forwardList by `' + str(updateList[i]['message']['from']['username']) + '\n'
+							if 'username' in updateList[i]['message']['from'] :
+								print('\nadded ', updateList[i]['message']['chat']['title'], ' (', updateList[i]['message']['chat']['id'], ') to forwardList by ', str(updateList[i]['message']['from']['username']), ' (', updateList[i]['message']['from']['id'], ')', sep='')
+								report = report + '`added `' + str(updateList[i]['message']['chat']['title']) + '` to forwardList by `%40' + str(updateList[i]['message']['from']['username']) + '\n'	# %40 = @
+							else :
+								print('\nadded ', updateList[i]['message']['chat']['title'], ' (', updateList[i]['message']['chat']['id'], ') to forwardList by ', str(updateList[i]['message']['from']), sep='')
+								report = report + '`added `' + str(updateList[i]['message']['chat']['title']) + '` to forwardList by `' + str(updateList[i]['message']['from']['first_name']) + ' (' + str(updateList[i]['message']['from']['id']) + ')\n'
 							sendReport = True
 					elif 'left_chat_member' in updateList[i]['message'] :
 						if updateList[i]['message']['left_chat_member']['id'] == botID :
@@ -230,7 +235,7 @@ def report_forwards() :
 			print('forward[', str(i),']: (', str(forwardList[i]), ') ', response['description'], sep='')
 	
 	#print('uploading forwardList.json to Dropbox')
-	#dbx.files_upload(json.dumps(forwardList).encode('utf-8'), '/forwardList.json',   dropbox.files.WriteMode('overwrite', None))
+	#dbx.files_upload(json.dumps(forwardList).encode('utf-8'), '/forwardList.json', dropbox.files.WriteMode('overwrite', None))
 	
 	#request = 'https://api.telegram.org/bot' + token + '/sendMessage'
 	#for i in range(len(admins)):
@@ -352,8 +357,8 @@ def post_photo():
 				if len(files) <= 10 :
 					report = report + '`telegram...success.`'
 					sendReport = True
-				else :
-					report = report + '`telegram...success.`'
+				#else :
+				#	report = report + '`telegram...success.`'
 				files.pop(0)
 				print('success.')
 			else :
@@ -365,7 +370,7 @@ def post_photo():
 				forwardMessage = False
 
 
-		#FORWARDING PHOTO
+		# FORWARDING PHOTO
 		if forwardMessage :
 			print('forwarding photo to', len(forwardList), 'chats...', end='')
 			successfulForwards = 0
@@ -405,24 +410,39 @@ def post_photo():
 		# send to twitter
 		if postToTwitter :
 			print('sending photo to twitter...', end='')
-			try :
-				if link is not None :
-					status = api.PostUpdate(status=link, media=[snep,])
-				else :
-					status = api.PostUpdate(status='', media=[snep,])
-				print('success.')
-			except UnicodeDecodeError :
-				print('Your message could not be encoded.  Perhaps it contains non-ASCII characters?')
-				print('Try explicitly specifying the encoding with the --encoding flag')
-			except :
-				print('failed.')
+			tries = 0
+			failed = False
+			while tries < 2 :
+				tries = tries + 1
 				try :
-					e = sys.exc_info()[0]
+					if link is not None :
+						status = api.PostUpdate(status=link, media=[snep,])
+					else :
+						status = api.PostUpdate(status='', media=[snep,])
+					tries = 100
+					failed = False
+					print('success.')
+				except UnicodeDecodeError :
+					print('Your message could not be encoded. Perhaps it contains non-ASCII characters?')
+					print('Try explicitly specifying the encoding with the --encoding flag')
+				except Exception as e : # python 3-y
+					print()
 					print(e)
-				except :
-					print('could not load exception')
+					failed = True
+					print('failed. retrying...')
+				except : # python 2-y
+					try :
+						e = sys.exc_info()[0]
+						print(e)
+					except :
+						print('could not load exception')
+					failed = True
+					print('failed. retrying...')
+
+			if failed : # failed
 				report = report + '\n`twitter...failed.`'
 				sendReport = True
+
 
 
 		
@@ -471,7 +491,7 @@ def schedule_nextupdate():
 	print()
 	print('scheduling update for', (delay), 'minutes from now')
 	#scheduler.enter((delay * 60), 1, scheduled_post, ())
-	scheduler.enterabs((nextupdate - ((60*60) * timezone)), 1, scheduled_post, ())
+	scheduler.enterabs((nextupdate - (3600 * timezone)), 1, scheduled_post, ())
 
 
 
@@ -508,7 +528,7 @@ def schedule_firstupdate():
 	print('bot started. scheduling first post...')
 	print('scheduling update for', nexttime)
 	#post_photo()
-	scheduler.enterabs((nextupdate - ((60*60) * timezone)), 1, scheduled_post, ())
+	scheduler.enterabs((nextupdate - (3600 * timezone)), 1, scheduled_post, ())
 
 
 
