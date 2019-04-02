@@ -22,18 +22,21 @@ botID = 0
 api = ''
 
 # credentials = {
-# 	'dropboxAccessToken' : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-# 	'telegramAccessToken' : 'yyyyyyyyy:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-# 	'telegramChannel' : -yyyyyyyyyyyyy,
-# 	'telegramBotID' : yyyyyyyyy,
-# 	'twitter' : {
-# 		'consumerKey' : 'xxxxxxxxxxxxxxxxxxxxxxxxx',
-# 		'consumerSecret' : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-# 		'accessTokenKey' : 'yyyyyyyyyyyyyyyyyyy-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-# 		'accessTokenSecret' : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+# 	"dropboxAccessToken" : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+# 	"telegramAccessToken" : "yyyyyyyyy:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+# 	"telegramChannel" : -yyyyyyyyyyyyy,
+# 	"telegramBotID" : yyyyyyyyy,
+# 	"twitter" : {
+# 		"consumerKey" : "xxxxxxxxxxxxxxxxxxxxxxxxx",
+# 		"consumerSecret" : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+# 		"accessTokenKey" : "yyyyyyyyyyyyyyyyyyy-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+# 		"accessTokenSecret" : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # 	}
 # }
-# credentials are now saved in credentials.json in the format above
+# credentials are saved in credentials.json in the format above
+
+# what to send to twitter in addition to the link (make sure encoding is utf-8)
+load = '' # remember to include whitespace at the end (newline or space)
 
 print('loading credentials...', end='')
 with open('credentials.json') as userinfo :
@@ -45,6 +48,13 @@ with open('credentials.json') as userinfo :
 	api = twitter.Api(consumer_key = credentials['twitter']['consumerKey'], consumer_secret = credentials['twitter']['consumerSecret'], access_token_key = credentials['twitter']['accessTokenKey'], access_token_secret = credentials['twitter']['accessTokenSecret'])
 	#print(json.dumps(credentials, indent=2))
 print('success.')
+
+print('loading load.txt...', end='')
+try :
+	with open('load.txt', 'r', encoding='utf-8') as twitterload :
+		load = twitterload.read()
+	print('success.')
+except : print('failed. (no load available)')
 
 #initialize the scheduler
 scheduler = sched.scheduler(time.time, time.sleep)
@@ -276,6 +286,7 @@ def post_photo():
 	global report
 	global sendReport
 	global api
+	global load
 	removeList = []
 	isImage = True
 	forwardMessage = True
@@ -374,18 +385,35 @@ def post_photo():
 		if forwardMessage :
 			print('forwarding photo to', len(forwardList), 'chats...', end='')
 			successfulForwards = 0
-			request = 'https://api.telegram.org/bot' + token + '/forwardMessage'
 			for i in range(len(forwardList)) :
-				response = requests.get(request + '?chat_id=' + str(forwardList[i]) + '&from_chat_id=' + str(channel) + '&message_id=' + str(sentFile['result']['message_id']))
-				if response.json()['ok'] :
+				request = requests.get('https://api.telegram.org/bot' + token + '/forwardMessage?chat_id=' + str(forwardList[i]) + '&from_chat_id=' + str(channel) + '&message_id=' + str(sentFile['result']['message_id']))
+				response = request.json()
+				if response['ok'] :
 					successfulForwards = successfulForwards + 1
 					#print('forward[' + str(i) + '] ok')
+				elif 'description' in response :
+					if 'Forbidden' in response['description'] :
+						removeList.append(forwardList[i])
+						report = report + '\n` removed `' + str(forwardList[i]) + '` from forward list`'
+						sendReport = True
+					elif 'group chat was upgraded to a supergroup chat' in response['description'] and 'parameters' in response and 'migrate_to_chat_id' in response['parameters'] :
+						forwardList[i] = response['parameters']['migrate_to_chat_id']
+						# try again
+						print('\ntrying with new ID...', end='')
+						secondtry = requests.get('https://api.telegram.org/bot' + token + '/forwardMessage?chat_id=' + str(forwardList[i]) + '&from_chat_id=' + str(channel) + '&message_id=' + str(sentFile['result']['message_id']))
+						if secondtry.json()['ok'] :
+							successfulForwards = successfulForwards + 1
+							print('success.')
+						else :
+							sendReport = True
+							print('failed')
 				else :
 					getchat = requests.get('https://api.telegram.org/bot' + token + '/getChat?chat_id=' + str(forwardList[i]))
 					getchat = getchat.json()
 					if getchat['ok'] :
 						print('\nforward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat['result']['title'], end='')
 						report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`) ` ' + getchat['result']['title']
+						sendReport = True
 					else :
 						if 'description' in getchat :
 							print('\nforward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ') ' + getchat['description'], end='')
@@ -393,16 +421,17 @@ def post_photo():
 							if 'Forbidden' in getchat['description'] :
 								removeList.append(forwardList[i])
 								report = report + '\n` removed `' + str(forwardList[i]) + '` from forward list`'
+								sendReport = True
 						else :
 							print('\nforward[' + str(i) + '] failed (chat_id: ' + str(forwardList[i]) + ')', end='')
 							report = report + '\n`forward[`' + str(i) + '`] failed (chat_id: `' + str(forwardList[i]) + '`)'
-					if 'description' in response.json() :
-						report = report + ' reason: `' + response.json()['description']
+							sendReport = True
+					if 'description' in response :
+						report = report + ' reason: `' + response['description']
 					else :
 						report = report + '`'
-					print('\nraw response:', response.json(), end='')
-					print('\nraw command:', response.url, end='')
-					sendReport = True
+					print('\nraw response:', response, end='')
+					print('\nraw command:', request.url)
 			report = report + '\n` forwarded to: `' + str(successfulForwards) + '` chats`'
 			print('done. ')
 
@@ -416,9 +445,9 @@ def post_photo():
 				tries = tries + 1
 				try :
 					if link is not None :
-						status = api.PostUpdate(status=link, media=[snep,])
+						status = api.PostUpdate(status=load+link, media=[snep,])
 					else :
-						status = api.PostUpdate(status='', media=[snep,])
+						status = api.PostUpdate(status=load, media=[snep,])
 					tries = 100
 					failed = False
 					print('success.')
@@ -563,14 +592,16 @@ def send_report():
 	if len(files) > 0 :
 		request = 'https://api.telegram.org/bot' + token + '/sendMessage'
 		for i in range(len(admins)):
-			response = requests.get(request + '?chat_id=' + str(admins[i]) + '&text=' + report + '&parse_mode=Markdown')
-			response = response.json()
+			request = requests.get(request + '?chat_id=' + str(admins[i]) + '&text=' + report + '&parse_mode=Markdown')
+			response = request.json()
 			if response['ok'] :
 				print('report[' + str(i) + ']: ok')
 			else :
 				print('report[' + str(i) + ']: failed (' + str(admins[i]) + ')')
 				if 'description' in response :
 					print('reason: ' + response['description'])
+				print('raw response:', response)
+				print('raw request:', request.url)
 	else :
 		request = 'https://api.telegram.org/bot' + token + '/sendMessage'
 		for i in range(len(admins)):
